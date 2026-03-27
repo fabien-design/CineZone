@@ -1,0 +1,229 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* ─── cinema ── deep theater dark (backgrounds, surfaces) ─────────────── */
+  --color-cinema-50:  #f2f2f6;
+  --color-cinema-100: #e2e2ec;
+  --color-cinema-200: #c5c5d9;
+  --color-cinema-300: #9999bf;
+  --color-cinema-400: #6e6ea0;
+  --color-cinema-500: #4e4e82;
+  --color-cinema-600: #3a3a68;
+  --color-cinema-700: #282850;
+  --color-cinema-800: #181834;
+  --color-cinema-900: #0d0d20;
+  --color-cinema-950: #07070f;
+
+  /* ─── reel ── warm cinema gold (primary accent, CTAs, highlights) ──────── */
+  --color-reel-50:  #fdf8ec;
+  --color-reel-100: #faefcc;
+  --color-reel-200: #f5db90;
+  --color-reel-300: #f0c450;
+  --color-reel-400: #e8a820;
+  --color-reel-500: #d4880a;
+  --color-reel-600: #b86808;
+  --color-reel-700: #944e0a;
+  --color-reel-800: #7a3e0d;
+  --color-reel-900: #643410;
+  --color-reel-950: #3a1a05;
+
+  /* ─── curtain ── velvet crimson (danger, badges, secondary accent) ──────── */
+  --color-curtain-50:  #fff1f1;
+  --color-curtain-100: #ffdada;
+  --color-curtain-200: #ffb3b3;
+  --color-curtain-300: #ff7a7a;
+  --color-curtain-400: #f94040;
+  --color-curtain-500: #e01010;
+  --color-curtain-600: #c00000;
+  --color-curtain-700: #9a0000;
+  --color-curtain-800: #7a0000;
+  --color-curtain-900: #5c0000;
+  --color-curtain-950: #330000;
+
+  /* ─── screen ── warm neutral (text, cards on light mode) ───────────────── */
+  --color-screen-50:  #fafaf7;
+  --color-screen-100: #f4f4ee;
+  --color-screen-200: #e8e8da;
+  --color-screen-300: #d4d4bc;
+  --color-screen-400: #b8b898;
+  --color-screen-500: #9a9a78;
+  --color-screen-600: #7c7c5e;
+  --color-screen-700: #62624a;
+  --color-screen-800: #4c4c3a;
+  --color-screen-900: #38382b;
+  --color-screen-950: #1e1e16;
+}
+
+/* ── Base defaults — cinema dark theme ───────────────────────────────────── */
+:root {
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* shadcn semantic tokens → our cinema palette */
+  --background:         #07070f; /* cinema-950 */
+  --foreground:         #f4f4ee; /* screen-100 */
+  --card:               #181834; /* cinema-800 */
+  --card-foreground:    #f4f4ee; /* screen-100 */
+  --popover:            #0d0d20; /* cinema-900 */
+  --popover-foreground: #f4f4ee; /* screen-100 */
+  --primary:            #d4880a; /* reel-500   */
+  --primary-foreground: #07070f; /* cinema-950 */
+  --secondary:          #282850; /* cinema-700 */
+  --secondary-foreground: #f4f4ee;
+  --muted:              #181834; /* cinema-800 */
+  --muted-foreground:   #6e6ea0; /* cinema-400 */
+  --accent:             #282850; /* cinema-700 */
+  --accent-foreground:  #f4f4ee;
+  --destructive:        #c00000; /* curtain-600 */
+  --border:             #282850; /* cinema-700 */
+  --input:              #282850; /* cinema-700 */
+  --ring:               #d4880a; /* reel-500   */
+  --radius:             0.5rem;
+
+  /* chart tokens reused for genre colors */
+  --chart-1: #d4880a;
+  --chart-2: #e8a820;
+  --chart-3: #f0c450;
+  --chart-4: #c00000;
+  --chart-5: #4e4e82;
+
+  /* sidebar */
+  --sidebar:                    #0d0d20;
+  --sidebar-foreground:         #f4f4ee;
+  --sidebar-primary:            #d4880a;
+  --sidebar-primary-foreground: #07070f;
+  --sidebar-accent:             #282850;
+  --sidebar-accent-foreground:  #f4f4ee;
+  --sidebar-border:             #282850;
+  --sidebar-ring:               #d4880a;
+}
+
+#root {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  text-decoration: inherit;
+  color: inherit;
+}
+
+/* ── Swiper overrides ─────────────────────────────────────────────────────── */
+.swiper-button-next,
+.swiper-button-prev {
+  color: white !important;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-reel-600) 90%, transparent),
+    color-mix(in srgb, var(--color-reel-500) 80%, transparent)
+  ) !important;
+  border-radius: 50%;
+  width: 44px !important;
+  height: 44px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-reel-500) 30%, transparent);
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background: linear-gradient(
+    135deg,
+    var(--color-reel-500),
+    var(--color-reel-400)
+  ) !important;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--color-reel-400) 50%, transparent);
+}
+
+.swiper-button-disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+}
+
+.swiper-scrollbar {
+  background-color: color-mix(in srgb, var(--color-cinema-700) 25%, transparent) !important;
+  height: 5px !important;
+  border-radius: 10px !important;
+}
+
+.swiper-scrollbar-drag {
+  background: linear-gradient(
+    90deg,
+    var(--color-reel-600),
+    var(--color-reel-400)
+  ) !important;
+  border-radius: 10px !important;
+  transition: background 0.3s ease !important;
+}
+
+select option {
+  background-color: var(--color-cinema-800);
+  color: var(--color-screen-100);
+  padding: 10px;
+}
+
+@theme inline {
+  --font-heading:  var(--font-sans);
+  --font-sans:  'Geist Variable', sans-serif;
+  --color-sidebar-ring:  var(--sidebar-ring);
+  --color-sidebar-border:  var(--sidebar-border);
+  --color-sidebar-accent-foreground:  var(--sidebar-accent-foreground);
+  --color-sidebar-accent:  var(--sidebar-accent);
+  --color-sidebar-primary-foreground:  var(--sidebar-primary-foreground);
+  --color-sidebar-primary:  var(--sidebar-primary);
+  --color-sidebar-foreground:  var(--sidebar-foreground);
+  --color-sidebar:  var(--sidebar);
+  --color-chart-5:  var(--chart-5);
+  --color-chart-4:  var(--chart-4);
+  --color-chart-3:  var(--chart-3);
+  --color-chart-2:  var(--chart-2);
+  --color-chart-1:  var(--chart-1);
+  --color-ring:  var(--ring);
+  --color-input:  var(--input);
+  --color-border:  var(--border);
+  --color-destructive:  var(--destructive);
+  --color-accent-foreground:  var(--accent-foreground);
+  --color-accent:  var(--accent);
+  --color-muted-foreground:  var(--muted-foreground);
+  --color-muted:  var(--muted);
+  --color-secondary-foreground:  var(--secondary-foreground);
+  --color-secondary:  var(--secondary);
+  --color-primary-foreground:  var(--primary-foreground);
+  --color-primary:  var(--primary);
+  --color-popover-foreground:  var(--popover-foreground);
+  --color-popover:  var(--popover);
+  --color-card-foreground:  var(--card-foreground);
+  --color-card:  var(--card);
+  --color-foreground:  var(--foreground);
+  --color-background:  var(--background);
+  --radius-sm:  calc(var(--radius) * 0.6);
+  --radius-md:  calc(var(--radius) * 0.8);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) * 1.4);
+  --radius-2xl:  calc(var(--radius) * 1.8);
+  --radius-3xl:  calc(var(--radius) * 2.2);
+  --radius-4xl:  calc(var(--radius) * 2.6);
+}
+
+/* App is dark-only — no .dark override needed */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
