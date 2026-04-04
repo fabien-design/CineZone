@@ -44,7 +44,7 @@ export function HeroBanner({ movie }: HeroBannerProps) {
           {movie.overview}
         </p>
 
-        <Button asChild size="lg">
+        <Button size="lg">
           <Link to={`/movies/${movie.id}`}>More Info</Link>
         </Button>
       </div>

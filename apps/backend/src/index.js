@@ -1,10 +1,13 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
 import movieRoutes from './routes/movies.js';
+import userRoutes from './routes/users.js';
+
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
@@ -17,6 +20,7 @@ app.use(cors({
   credentials: true,
 }));
 
+app.use(cookieParser());
 app.use(express.json());
 
 app.get('/api/health', (_req, res) => {
@@ -24,6 +28,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/movies', movieRoutes);
+app.use('/api/users', userRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err.stack);

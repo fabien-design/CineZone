@@ -15,22 +15,10 @@ CREATE TABLE users (
   password     VARCHAR(255)    NOT NULL,               -- hash bcrypt
   role         ENUM('user','admin') NOT NULL DEFAULT 'user',
   avatar_url   VARCHAR(500)    NULL,
+  refresh_token VARCHAR(512)    NULL,               -- token de rafraîchissement JWT
   created_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
-);
-
--- ------------------------------------------------------------
--- REFRESH TOKENS  (persistance JWT)
--- ------------------------------------------------------------
-CREATE TABLE refresh_tokens (
-  id           INT UNSIGNED    NOT NULL AUTO_INCREMENT,
-  user_id      INT UNSIGNED    NOT NULL,
-  token        VARCHAR(512)    NOT NULL UNIQUE,
-  expires_at   TIMESTAMP       NOT NULL,
-  created_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  CONSTRAINT fk_rt_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- ------------------------------------------------------------

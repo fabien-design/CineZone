@@ -1,6 +1,8 @@
 import { Link, NavLink } from 'react-router';
+import { LogOut, User } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 const NAV_LINKS = [
   { to: '/', label: 'Home', end: true },
@@ -8,6 +10,8 @@ const NAV_LINKS = [
 ];
 
 export function Navbar() {
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-cinema-950/80 backdrop-blur-md border-b border-border/50">
       <nav
@@ -39,12 +43,29 @@ export function Navbar() {
         </ul>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/login">Login</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link to="/register">Sign Up</Link>
-          </Button>
+          {!isLoading && (
+            isAuthenticated ? (
+              <>
+                <div className="flex items-center gap-2 text-sm text-screen-200">
+                  <User size={16} className="text-reel-400" />
+                  <span>{user!.username}</span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={logout}>
+                  <LogOut size={16} />
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm">
+                  <Link to="/login">Log In</Link>
+                </Button>
+                <Button size="sm">
+                  <Link to="/register">Sign Up</Link>
+                </Button>
+              </>
+            )
+          )}
         </div>
       </nav>
     </header>
