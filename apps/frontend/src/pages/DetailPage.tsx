@@ -1,8 +1,6 @@
 import { useRef } from 'react';
 import { useParams, Link } from 'react-router';
-import { useAtomValue } from 'jotai';
 import { ChevronLeft } from 'lucide-react';
-import { isAuthenticatedAtom } from '../store/uiAtoms';
 import { useMovieById } from '../hooks/useMovies';
 import { formatMoney } from '../lib/tmdb';
 import { Navbar } from '../components/layout/Navbar';
@@ -13,19 +11,20 @@ import { TrailerSection } from '../components/movie/TrailerSection';
 import { UserActions } from '../components/movie/UserActions';
 import { MovieRow } from '../components/movie/MovieRow';
 import { SectionHeader } from '../components/ui/SectionHeader';
+import { useAuth } from '@/hooks/useAuth';
 
 export function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const movieId = Number(id);
 
-  const isAuthenticated = useAtomValue(isAuthenticatedAtom);
-  const { data: movie, isLoading, isError } = useMovieById(movieId);
+  const { isAuthenticated } = useAuth(); 
+  const { data: movie, isLoading: isLoadingMovie, isError } = useMovieById(movieId);
 
   const trailerRef = useRef<HTMLDivElement>(null);
   const scrollToTrailer = () =>
     trailerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  if (isLoading) {
+  if (isLoadingMovie) {
     return (
       <div className="min-h-screen bg-cinema-950">
         <Navbar />

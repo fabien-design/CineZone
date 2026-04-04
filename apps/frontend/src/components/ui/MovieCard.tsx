@@ -19,7 +19,7 @@ export function MovieCard({ movie, className }: MovieCardProps) {
         className,
       )}
     >
-      <div className="relative aspect-[2/3] overflow-hidden">
+      <div className="relative aspect-2/3 overflow-hidden">
         <img
           src={getPosterUrl(movie.poster_path)}
           alt={movie.title}

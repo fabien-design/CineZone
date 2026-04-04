@@ -1,76 +1,186 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import database from "../database.js";
+import database from "../services/database.js";
+import authConfig from "../config/auth.config.js";
 
-export async function createUser(req, res){
-    const { name, email, hashedPassword } = req.body;
+export async function create(req, res) {
+    const { username, email, hashedPassword } = req.body;
 
-    try{
+    try {
         const [result] = await database.query(
-            "INSERT INTO users (name, email, password) VALUES (?,?,?)", 
-            [name, email, hashedPassword]
+            "INSERT INTO users (username, email, password) VALUES (?,?,?)",
+            [username, email, hashedPassword],
         );
 
-        if(result){
+        if (result) {
             res.status(201).json({
-                'message': 'User created successfully',
-                'id': result.insertId
+                message: "User created successfully",
+                id: result.insertId,
             });
         }
-    } catch (err) { 
+    } catch (err) {
         console.error(err);
         res.sendStatus(500);
     }
 }
 
-export async function login(req, res){
+export async function login(req, res) {
     const { email, password } = req.body;
 
-    try{
-        //check email
+    try {
         const [users] = await database.query(
-            "SELECT * FROM users WHERE email =?", 
-            [email]
+            "SELECT id, password FROM users WHERE email =? LIMIT 1",
+            [email],
         );
 
-        if(users.length === 0){
+        if (users.length === 0) {
             return res.status(401).send({
-                "message": "Wrong credentials1"
+                message: "Wrong credentials",
             });
         }
 
         const user = users[0];
 
-        //check le mdp
         const passwordMatch = await bcrypt.compare(password, user.password);
-        if(!passwordMatch){
-             return res.status(401).send({
-                "message": "Wrong credentials2"
+        if (!passwordMatch) {
+            return res.status(401).send({
+                message: "Wrong credentials",
             });
         }
 
-        //generer le jwt
         const token = jwt.sign(
             {
                 id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role
             },
-            process.env.JWT_SECRET,
+            authConfig.secret,
             {
-                expiresIn: "24h"
-            }
+                expiresIn: authConfig.secret_expires_in,
+            },
         );
 
-        res.status(200).json({
-            token
+        const refreshToken = jwt.sign(
+            {
+                id: user.id,
+            },
+            authConfig.refresh_secret,
+            {
+                expiresIn: authConfig.refresh_secret_expires_in,
+            },
+        );
+
+        // Update the user's refresh token in the database
+        await database.query(
+            "UPDATE users SET refresh_token = ? WHERE id = ?",
+            [refreshToken, user.id],
+        );
+
+        res.cookie("accessToken", token, {
+            httpOnly: true, // Ensure the cookie cannot be accessed via JavaScript (security against XSS attacks)
+            secure: process.env.NODE_ENV === "production", // Set to true in production for HTTPS-only cookies
+            maxAge: 60 * 60 * 1000, // 60 minutes in mileseconds
+            sameSite: "strict", // Ensures the cookie is sent only with requests from the same site
+        });
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours is mileseconds
+            sameSite: "strict",
         });
 
+        return res.status(200).json({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send({
-            "message": "an error has occured"
-        })
+            message: "an error has occured",
+        });
+    }
+}
+
+export async function me(req, res) {
+    try {
+        const [users] = await database.query(
+            "SELECT id, username, email, role FROM users WHERE id = ? LIMIT 1",
+            [req.userId],
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res.status(200).json(users[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ message: "An error has occurred" });
+    }
+}
+
+export async function logout(req, res) {
+    const userId = req.userId; // Get userId from the authenticateUser middleware
+
+    try {
+        // Clear the refresh token in the database
+        await database.query(
+            "UPDATE users SET refresh_token = NULL WHERE id = ?",
+            [userId],
+        );
+
+        // Clear the cookies
+        res.clearCookie("accessToken");
+        res.clearCookie("refreshToken");
+
+        res.status(200).send({
+            message: "Logged out successfully",
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({
+            message: "an error has occured",
+        });
+    }
+}
+
+export async function refreshToken(req, res) {
+    try {
+        const userId = req.userId; // Get userId from the refreshTokenValidation middleware
+        const refreshToken = req.cookies.refreshToken;
+
+        // Check if the refresh token has been revoked
+        const user = await database.query(
+            "SELECT refresh_token FROM users WHERE id = ?",
+            [userId],
+        );
+
+        if (!user || !user.refreshToken) {
+            return res.status(401).json({ message: "Invalid refresh token" });
+        }
+
+        // Check if the refresh token in the database matches the one from the client
+        if (user.refreshToken !== refreshToken) {
+            return res.status(401).json({ message: "Invalid refresh token" });
+        }
+
+        const newAccessToken = jwt.sign(
+            { id: userId },
+            authConfig.secret,
+            { expiresIn: authConfig.secret_expires_in },
+        );
+
+        res.cookie("accessToken", newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 60 * 60 * 1000, // 60 minutes
+            sameSite: "strict",
+        });
+
+        return res
+            .status(200)
+            .json({ message: "Access token refreshed successfully" });
+    } catch (error) {
+        console.error("Refresh Token failed:", error);
+        return res.status(500).json({ message: "Failed to refresh token" });
     }
 }

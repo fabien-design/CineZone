@@ -117,6 +117,11 @@ a {
   color: inherit;
 }
 
+button {
+  @apply transition-colors;
+  cursor: pointer;
+}
+
 /* ── Swiper overrides ─────────────────────────────────────────────────────── */
 .swiper-button-next,
 .swiper-button-prev {
