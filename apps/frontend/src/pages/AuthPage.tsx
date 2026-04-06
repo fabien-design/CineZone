@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { Film } from 'lucide-react';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterForm } from '@/components/auth/RegisterForm';
@@ -11,6 +11,8 @@ type Props = { choosedTab?: Tab };
 
 export function AuthPage({ choosedTab }: Props) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirectTo') ?? '/';
   const [tab, setTab] = useState<Tab>(choosedTab ?? 'login');
 
   return (
@@ -46,7 +48,7 @@ export function AuthPage({ choosedTab }: Props) {
           </h1>
 
           {tab === 'login' ? (
-            <LoginForm onSuccess={() => navigate('/')} />
+            <LoginForm onSuccess={() => navigate(redirectTo)} />
           ) : (
             <RegisterForm onSuccess={() => setTab('login')} />
           )}

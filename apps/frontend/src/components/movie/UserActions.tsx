@@ -1,8 +1,6 @@
-import { Link } from 'react-router';
-import { Heart, Bookmark, LogIn } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { Link, useLocation } from 'react-router';
+import { LogIn } from 'lucide-react';
 import { Button } from '../ui/button';
-import { Separator } from '../ui/separator';
 import { SectionHeader } from '../ui/SectionHeader';
 import { RatingForm } from './RatingForm';
 import type { RatingValues } from '@/lib/schemas/rating';
@@ -11,13 +9,18 @@ interface UserActionsProps {
   isAuthenticated: boolean;
   isFavorite: boolean;
   isInWatchlist: boolean;
-  userRating: number;
+  initialRating?: number;
+  initialComment?: string;
   onToggleFavorite: () => void;
   onToggleWatchlist: () => void;
   onSubmitRating: (values: RatingValues) => Promise<void>;
+  onDeleteReview: () => Promise<void>;
 }
 
 function UnauthenticatedPrompt() {
+  const location = useLocation();
+  const currentPath = `${location.pathname}${location.search}${location.hash}`;
+
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-cinema-800/50 border border-border rounded-xl p-5">
       <div className="flex items-center gap-3">
@@ -28,10 +31,10 @@ function UnauthenticatedPrompt() {
       </div>
       <div className="flex gap-3 shrink-0">
         <Button variant="outline" size="sm">
-          <Link to="/login">Login</Link>
+          <Link to={`/login?redirectTo=${encodeURIComponent(currentPath)}`}>Login</Link>
         </Button>
         <Button size="sm">
-          <Link to="/register">Sign Up</Link>
+          <Link to={`/register?redirectTo=${encodeURIComponent(currentPath)}`}>Sign Up</Link>
         </Button>
       </div>
     </div>
@@ -42,10 +45,12 @@ export function UserActions({
   isAuthenticated,
   isFavorite,
   isInWatchlist,
-  userRating,
+  initialRating = 0,
+  initialComment = '',
   onToggleFavorite,
   onToggleWatchlist,
   onSubmitRating,
+  onDeleteReview,
 }: UserActionsProps) {
   return (
     <section aria-labelledby="user-actions-heading">
@@ -56,8 +61,10 @@ export function UserActions({
       ) : (
         <div className="bg-cinema-800/40 border border-border rounded-xl p-6 flex flex-col gap-6">
           <RatingForm
-            initialRating={userRating}
+            initialRating={initialRating}
+            initialComment={initialComment}
             onSubmitForm={onSubmitRating}
+            onDeleteReview={onDeleteReview}
             onSuccess={() => {}}
           />
         </div>
