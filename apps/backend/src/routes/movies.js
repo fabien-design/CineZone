@@ -7,18 +7,12 @@ import {
   getGenres,
   discoverMovies,
 } from '../services/tmdb.js';
-import { movieLists } from '../controllers/movieController.js';
+import { createMovie, updateMovie, deleteMovie, getLocalMovies } from '../controllers/localMovieController.js';
+import { authenticateUser } from '../middlewares/authMiddleware.js';
+import { isAdmin } from '../middlewares/isAdmin.js';
+import { validateLocalMovieCreation } from '../middlewares/validateLocalMovie.js';
 
 const router = express.Router();
-
-router.get('/test', async (req, res, next) => {
-  try {
-    await movieLists(req, res);
-  } catch (err) {
-    console.error('Error in /test route:', err);
-    next(err);
-  }
-});
 
 router.get('/trending/:timeWindow', async (req, res, next) => {
   try {
@@ -63,5 +57,11 @@ router.get('/:id', async (req, res, next) => {
     res.json(data);
   } catch (err) { next(err); }
 });
+
+// Local movies CRUD
+router.get('/local', authenticateUser, isAdmin, getLocalMovies);
+router.post('/local', authenticateUser, isAdmin, validateLocalMovieCreation, createMovie);
+router.put('/local/:id', authenticateUser, isAdmin, updateMovie);
+router.delete('/local/:id', authenticateUser, isAdmin, deleteMovie);
 
 export default router;
