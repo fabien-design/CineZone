@@ -94,6 +94,7 @@ export interface Video {
  * Both MovieDetail and LocalMovie can be adapted to this type.
  */
 export interface HeroMovieData {
+    id?: number;
     source?: "tmdb" | "local";
     title: string;
     poster_path: string | null;
