@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router';
-import { Dices, Home, Search } from 'lucide-react';
+import { Home, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RandomMovieButton } from '../ui/RandomMovieButton';
 
