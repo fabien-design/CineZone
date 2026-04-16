@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router';
 import { LogIn } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { buttonVariants } from '../ui/button';
 import { SectionHeader } from '../ui/SectionHeader';
 import { RatingForm } from './RatingForm';
@@ -7,6 +8,7 @@ import type { RatingValues } from '@/lib/schemas/rating';
 
 
 function UnauthenticatedPrompt() {
+    const { t } = useTranslation();
     const location = useLocation();
     const currentPath = `${location.pathname}${location.search}${location.hash}`;
 
@@ -15,7 +17,7 @@ function UnauthenticatedPrompt() {
             <div className="flex items-center gap-3">
                 <LogIn size={20} className="text-reel-400 shrink-0" />
                 <p className="text-screen-200 text-sm">
-                    Sign in to save this movie to your lists and leave a rating.
+                    {t('userActions.signInPrompt')}
                 </p>
             </div>
             <div className="flex gap-3 shrink-0">
@@ -23,13 +25,13 @@ function UnauthenticatedPrompt() {
                     to={`/login?redirectTo=${encodeURIComponent(currentPath)}`}
                     className={buttonVariants({ variant: 'outline', size: 'sm' })}
                 >
-                    Login
+                    {t('userActions.login')}
                 </Link>
                 <Link
                     to={`/register?redirectTo=${encodeURIComponent(currentPath)}`}
                     className={buttonVariants({ size: 'sm' })}
                 >
-                    Sign Up
+                    {t('userActions.signUp')}
                 </Link>
             </div>
         </div>
@@ -51,9 +53,11 @@ export function UserActions({
     onSubmitRating,
     onDeleteReview,
 }: UserActionsProps) {
+    const { t } = useTranslation();
+
     return (
         <section aria-labelledby="user-actions-heading">
-            <SectionHeader title="Your Activity" id="user-actions-heading" />
+            <SectionHeader title={t('userActions.title')} id="user-actions-heading" />
 
             {!isAuthenticated ? (
                 <UnauthenticatedPrompt />

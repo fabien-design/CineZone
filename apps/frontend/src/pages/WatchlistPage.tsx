@@ -1,18 +1,20 @@
 import { ClockPlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { UserListPage } from '../components/user/UserListPage';
 import { useWatchlist } from '../hooks/useUserLists';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export function WatchlistPage() {
-    useDocumentTitle('Watchlist');
+    const { t } = useTranslation();
+    useDocumentTitle(t('lists.watchlist'));
     const { data, isLoading } = useWatchlist();
     return (
         <UserListPage
-            title="Watchlist"
+            title={t('lists.watchlist')}
             icon={<ClockPlus size={24} />}
             movies={data}
             isLoading={isLoading}
-            emptyMessage="Your watchlist is empty — add movies you want to watch."
+            emptyMessage={t('lists.emptyWatchlist')}
         />
     );
 }

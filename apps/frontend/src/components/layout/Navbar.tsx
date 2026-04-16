@@ -1,8 +1,10 @@
 import { Link, NavLink } from "react-router";
 import { Bookmark, ClockPlus, Eye, LogOut, ShieldUser, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/utils";
 import { Button, buttonVariants } from "../ui/button";
 import { RandomMovieButton } from "../ui/RandomMovieButton";
+import { LanguageSwitcher } from "../ui/LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import {
     DropdownMenu,
@@ -13,13 +15,14 @@ import {
     DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 
-const NAV_LINKS = [
-    { to: "/", label: "Home", end: true },
-    { to: "/discover", label: "Discover", end: false },
-];
-
 export function Navbar() {
     const { user, isAuthenticated, isLoading, logout } = useAuth();
+    const { t } = useTranslation();
+
+    const NAV_LINKS = [
+        { to: "/", label: t('nav.home'), end: true },
+        { to: "/discover", label: t('nav.discover'), end: false },
+    ];
 
     return (
         <header className="fixed top-0 inset-x-0 z-50 bg-cinema-950/80 backdrop-blur-md border-b border-border/50">
@@ -58,6 +61,7 @@ export function Navbar() {
                 </ul>
 
                 <div className="flex items-center gap-3">
+                    <LanguageSwitcher />
                     {!isLoading &&
                         (isAuthenticated ? (
                             <>
@@ -73,7 +77,7 @@ export function Navbar() {
                                             </div>
                                         </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-32">
+                                    <DropdownMenuContent className="w-40">
                                         {user?.role === "admin" && (
                                             <>
                                                 <DropdownMenuGroup>
@@ -92,7 +96,7 @@ export function Navbar() {
                                                                 )
                                                             }
                                                         >
-                                                            Admin
+                                                            {t('nav.admin')}
                                                         </NavLink>
                                                     </DropdownMenuItem>
                                                 </DropdownMenuGroup>
@@ -111,7 +115,7 @@ export function Navbar() {
                                                         className="w-full justify-start hover:text-reel-400 hover:bg-transparent"
                                                     >
                                                         <User size={16} />
-                                                        Profile
+                                                        {t('nav.profile')}
                                                     </Button>
                                                 </Link>
                                             </DropdownMenuItem>
@@ -126,7 +130,7 @@ export function Navbar() {
                                                         className="w-full justify-start hover:text-reel-400 hover:bg-transparent"
                                                     >
                                                         <Bookmark size={16} />
-                                                        Favorites
+                                                        {t('nav.favorites')}
                                                     </Button>
                                                 </Link>
                                             </DropdownMenuItem>
@@ -141,7 +145,7 @@ export function Navbar() {
                                                         className="w-full justify-start hover:text-reel-400 hover:bg-transparent"
                                                     >
                                                         <ClockPlus size={16} />
-                                                        Watchlist
+                                                        {t('nav.watchlist')}
                                                     </Button>
                                                 </Link>
                                             </DropdownMenuItem>
@@ -156,7 +160,7 @@ export function Navbar() {
                                                         className="w-full justify-start hover:text-reel-400 hover:bg-transparent"
                                                     >
                                                         <Eye size={16} />
-                                                        History
+                                                        {t('nav.history')}
                                                     </Button>
                                                 </Link>
                                             </DropdownMenuItem>
@@ -170,7 +174,7 @@ export function Navbar() {
                                                 className="w-full justify-start hover:text-reel-400 hover:bg-transparent"
                                             >
                                                 <LogOut size={16} />
-                                                Log out
+                                                {t('nav.logOut')}
                                             </Button>
                                         </DropdownMenuGroup>
                                     </DropdownMenuContent>
@@ -179,10 +183,10 @@ export function Navbar() {
                         ) : (
                             <>
                                 <Link to="/login" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
-                                    Log In
+                                    {t('nav.logIn')}
                                 </Link>
                                 <Link to="/register" className={buttonVariants({ size: 'sm' })}>
-                                    Sign Up
+                                    {t('nav.signUp')}
                                 </Link>
                             </>
                         ))}

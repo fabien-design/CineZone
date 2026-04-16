@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { Button } from '../ui/button';
 import { formatRating, formatYear, getBackdropUrl } from '../../lib/tmdb';
 import type { Movie } from '../../types/movie';
+import { useTranslation } from 'react-i18next';
 
 interface HeroBannerProps {
   movie: Movie;
@@ -9,6 +10,7 @@ interface HeroBannerProps {
 
 export function HeroBanner({ movie }: HeroBannerProps) {
   const backdropUrl = getBackdropUrl(movie.backdrop_path);
+  const { t } = useTranslation();
 
   return (
     <section className="relative h-[90vh] min-h-[540px] flex items-end overflow-hidden">
@@ -45,7 +47,7 @@ export function HeroBanner({ movie }: HeroBannerProps) {
         </p>
 
         <Button size="lg">
-          <Link to={`/movies/${movie.id}`}>More Info</Link>
+          <Link to={`/movies/${movie.id}`}>{t('detail.showMore')}</Link>
         </Button>
       </div>
     </section>
