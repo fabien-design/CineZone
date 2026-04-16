@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useParams, Link } from 'react-router';
 import { ChevronLeft } from 'lucide-react';
@@ -24,6 +25,7 @@ interface DetailPageProps {
 }
 
 export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const movieId = Number(id);
 
@@ -63,9 +65,9 @@ export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
     return (
       <div className="min-h-screen bg-cinema-950 flex flex-col items-center justify-center gap-4">
         <Navbar />
-        <p className="text-screen-300 text-lg">Movie not found.</p>
+        <p className="text-screen-300 text-lg">{t('detail.notFound')}</p>
         <Link to="/" className="text-reel-400 hover:text-reel-300 text-sm underline">
-          Back to Home
+          {t('detail.backToHome')}
         </Link>
         <BottomBar />
       </div>
@@ -93,10 +95,10 @@ export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
   const hasTrailerSection = tmdbMovie?.videos?.results?.some(v => v.site === 'YouTube') ?? false;
 
   const extraInfo: { label: string; value: string }[] = [
-    { label: 'Status',            value: tmdbMovie?.status ?? '' },
-    { label: 'Budget',            value: tmdbMovie ? formatMoney(tmdbMovie.budget) : '' },
-    { label: 'Revenue',           value: tmdbMovie ? formatMoney(tmdbMovie.revenue) : '' },
-    { label: 'Original Language', value: tmdbMovie?.original_language?.toUpperCase() ?? '' },
+    { label: t('detail.status'),           value: tmdbMovie?.status ?? '' },
+    { label: t('detail.budget'),           value: tmdbMovie ? formatMoney(tmdbMovie.budget) : '' },
+    { label: t('detail.revenue'),          value: tmdbMovie ? formatMoney(tmdbMovie.revenue) : '' },
+    { label: t('detail.originalLanguage'), value: tmdbMovie?.original_language?.toUpperCase() ?? '' },
   ].filter(item => item.value && item.value !== 'N/A');
 
   if (!heroData) return null;
@@ -124,17 +126,16 @@ export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
           className="self-start flex items-center gap-1 text-sm text-cinema-400 hover:text-screen-100 transition-colors duration-200 -mt-6"
         >
           <ChevronLeft size={16} />
-          Back to Home
+          {t('detail.backToHome')}
         </Link>
 
         {/* Overview */}
         <section aria-labelledby="overview-heading">
-          <SectionHeader title="Overview" id="overview-heading" />
+          <SectionHeader title={t('detail.overview')} id="overview-heading" />
           <div className="flex flex-col md:flex-row gap-8">
             <p className="text-screen-300 text-base leading-relaxed flex-1">
-              {movie.overview || 'No overview available.'}
+              {movie.overview || t('detail.noOverview')}
             </p>
-            {/* Extra info sidebar */}
             {extraInfo.length > 0 && (
               <dl className="flex flex-col gap-3 md:w-56 shrink-0">
                 {extraInfo.map(({ label, value }) => (
@@ -159,11 +160,9 @@ export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
 
         {/* Community reviews */}
         <section aria-labelledby="reviews-heading">
-          <SectionHeader title="Community Reviews" id="reviews-heading" />
+          <SectionHeader title={t('detail.communityReviews')} id="reviews-heading" />
           <ReviewList ratings={movieRatings} isLoading={isLoadingRatings} />
         </section>
-        
-
 
         {/* Cast */}
         {cast.length > 0 && <CastSection cast={cast} />}
@@ -178,7 +177,7 @@ export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
         {/* Recommendations */}
         {recommendations.length > 0 && (
           <section aria-labelledby="recommendations-heading">
-            <SectionHeader title="You Might Also Like" id="recommendations-heading" />
+            <SectionHeader title={t('detail.youMightAlsoLike')} id="recommendations-heading" />
             <MovieRow movies={recommendations} />
           </section>
         )}

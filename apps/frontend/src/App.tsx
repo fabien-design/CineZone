@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { HomePage } from "./pages/HomePage";
 import { DetailPage } from "./pages/DetailPage";
 import { AuthPage } from "./pages/AuthPage";
@@ -12,6 +13,7 @@ import { setNavigate } from "./lib/navigation";
 
 function App() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     useEffect(() => {
         setNavigate(navigate);
@@ -23,7 +25,7 @@ function App() {
                 href="#main-content"
                 className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-9999 focus:rounded-lg focus:bg-cinema-900 focus:px-4 focus:py-2 focus:text-sm focus:text-screen-100 focus:ring-2 focus:ring-reel-400"
             >
-                Skip to main content
+                {t('skipToContent')}
             </a>
             <Routes>
                 <Route path="/" element={<HomePage />} />

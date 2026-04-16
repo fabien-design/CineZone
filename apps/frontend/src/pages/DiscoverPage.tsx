@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { Search, X } from "lucide-react";
 import { Navbar } from "../components/layout/Navbar";
@@ -17,7 +18,8 @@ import { useSearchParams } from "react-router";
 import BottomBar from "@/components/layout/BottomBar";
 
 export function DiscoverPage() {
-    useDocumentTitle('Discover');
+    const { t } = useTranslation();
+    useDocumentTitle(t('nav.discover'));
     const [searchParams, setSearchParams] = useSearchParams();
     const [query, setQuery] = useState(searchParams.get("q") ?? "");
     const [debouncedQuery, setDebounced] = useState("");
@@ -109,14 +111,7 @@ export function DiscoverPage() {
                 );
         }
         return accTmdb;
-    }, [
-        showTmdb,
-        isSearchMode,
-        searchData,
-        accTmdb,
-        ratingRange,
-        selectedGenres,
-    ]);
+    }, [showTmdb, isSearchMode, searchData, accTmdb, ratingRange, selectedGenres]);
 
     const localMoviesConverted: Movie[] = useMemo(() => {
         if (!showLocal) return [];
@@ -125,9 +120,7 @@ export function DiscoverPage() {
             : (localMovies ?? []).filter(
                   (m) =>
                       !debouncedQuery ||
-                      m.title
-                          .toLowerCase()
-                          .includes(debouncedQuery.toLowerCase()),
+                      m.title.toLowerCase().includes(debouncedQuery.toLowerCase()),
               );
         return base
             .filter(
@@ -140,20 +133,10 @@ export function DiscoverPage() {
             .filter(
                 (m) =>
                     selectedGenres.length === 0 ||
-                    selectedGenres.some((g) =>
-                        m.genres.some((mg) => mg.id === g),
-                    ),
+                    selectedGenres.some((g) => m.genres.some((mg) => mg.id === g)),
             )
             .map(localToMovie);
-    }, [
-        showLocal,
-        isSearchMode,
-        searchData,
-        localMovies,
-        debouncedQuery,
-        ratingRange,
-        selectedGenres,
-    ]);
+    }, [showLocal, isSearchMode, searchData, localMovies, debouncedQuery, ratingRange, selectedGenres]);
 
     const results: Movie[] = useMemo(() => {
         if (source === "local") return localMoviesConverted;
@@ -161,22 +144,15 @@ export function DiscoverPage() {
         return [...localMoviesConverted, ...tmdbMovies];
     }, [source, localMoviesConverted, tmdbMovies]);
 
-    // ── UI state ──────────────────────────────────────────────────────────────
     const isLoading =
-        (showTmdb &&
-            !isSearchMode &&
-            discoverFetching &&
-            accTmdb.length === 0) ||
+        (showTmdb && !isSearchMode && discoverFetching && accTmdb.length === 0) ||
         (isSearchMode && searchFetching);
 
     const hasMore =
         !isSearchMode && showTmdb && page < (discoverData?.total_pages ?? 1);
 
     const hasActiveFilters =
-        rating !== null ||
-        selectedGenres.length > 0 ||
-        source !== "all" ||
-        query !== "";
+        rating !== null || selectedGenres.length > 0 || source !== "all" || query !== "";
 
     const handleGenreToggle = (id: number) =>
         setGenres((prev) =>
@@ -197,7 +173,6 @@ export function DiscoverPage() {
             <Navbar />
 
             <main id="main-content" className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-16 flex flex-col gap-5">
-                {/* Search bar */}
                 <div className="relative">
                     <Search
                         className="absolute left-4 top-1/2 -translate-y-1/2 text-cinema-400 pointer-events-none"
@@ -207,14 +182,14 @@ export function DiscoverPage() {
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Rechercher un film..."
-                        aria-label="Search movies"
+                        placeholder={t('discover.searchPlaceholder')}
+                        aria-label={t('discover.searchLabel')}
                         className="w-full bg-cinema-900 border border-border/40 rounded-xl pl-11 pr-10 py-3 text-screen-100 placeholder:text-cinema-500 focus:outline-none focus:border-reel-400/50 focus:ring-1 focus:ring-reel-400/20 transition-colors text-sm"
                     />
                     {query && (
                         <button
                             onClick={() => setQuery("")}
-                            aria-label="Clear search"
+                            aria-label={t('discover.clearSearch')}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-cinema-400 hover:text-screen-100 transition-colors p-1"
                         >
                             <X size={15} />
@@ -222,7 +197,6 @@ export function DiscoverPage() {
                     )}
                 </div>
 
-                {/* Filters */}
                 <DiscoverFilters
                     source={source}
                     onSourceChange={setSource}
@@ -236,16 +210,14 @@ export function DiscoverPage() {
                     hasActiveFilters={hasActiveFilters}
                 />
 
-                {/* Result count */}
                 {!isLoading && (
                     <p className="text-cinema-500 text-xs">
                         {results.length > 0
-                            ? `${results.length} film${results.length > 1 ? "s" : ""}`
+                            ? t('discover.filmCount', { count: results.length })
                             : null}
                     </p>
                 )}
 
-                {/* Grid */}
                 <DiscoverGrid
                     movies={results}
                     isLoading={isLoading}

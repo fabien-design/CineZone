@@ -12,6 +12,7 @@ import { GenreBadge } from "../ui/GenreBadge";
 import type { HeroMovieData, MovieRef } from "../../types/movie";
 import { useState } from "react";
 import { ViewerCount } from "./ViewerCount";
+import { useTranslation } from "react-i18next";
 
 interface MovieDetailHeroProps {
     movie: HeroMovieData;
@@ -36,6 +37,8 @@ export function MovieDetailHero({
     onToggleWatched,
     onWatchTrailer,
 }: MovieDetailHeroProps) {
+    const { t } = useTranslation();
+
     const backdropUrl = movie.source === "local" ? movie.backdrop_path : getBackdropUrl(movie.backdrop_path);
     const posterUrl = getPosterUrl(movie.poster_path, "w342");
     const hasTrailer = movie.videos?.results?.some(
@@ -132,7 +135,7 @@ export function MovieDetailHero({
                         {hasTrailer && (
                             <Button onClick={onWatchTrailer} className="gap-2">
                                 <Play size={15} fill="currentColor" />
-                                Watch Trailer
+                                {t("detail.watchTrailer")}
                             </Button>
                         )}
 
@@ -154,7 +157,7 @@ export function MovieDetailHero({
                                 size={15}
                                 fill={optimisticFav ? "currentColor" : "none"}
                             />
-                            {optimisticFav ? "Saved" : "Favorite"}
+                            {optimisticFav ? t("detail.isFavorite") : t("detail.favorite")}
                         </Button>
 
                         <Button
@@ -172,7 +175,7 @@ export function MovieDetailHero({
                             )}
                         >
                             <ClockPlus size={15} color="currentColor" />
-                            {isInWatchlist ? "In Watchlist" : "Watchlist"}
+                            {isInWatchlist ? t("detail.isWatchlist") : t("detail.watchlist")}
                         </Button>
 
                         <Button
@@ -190,7 +193,7 @@ export function MovieDetailHero({
                             )}
                         >
                             <Eye size={15} color="currentColor" />
-                            {optimisticWatched ? "Watched" : "Mark as Watched"}
+                            {optimisticWatched ? t("detail.isWatched") : t("detail.watched")}
                         </Button>
                     </div>
                 </div>

@@ -1,14 +1,17 @@
 import { Link, useLocation } from 'react-router';
 import { Home, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { RandomMovieButton } from '../ui/RandomMovieButton';
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
 export default function BottomBar() {
   const location = useLocation();
+  const { t } = useTranslation();
 
   const navItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/discover', label: 'Discover', icon: Search },
+    { path: '/', label: t('nav.home'), icon: Home },
+    { path: '/discover', label: t('nav.discover'), icon: Search },
   ];
 
   return (
@@ -30,6 +33,7 @@ export default function BottomBar() {
           </Link>
         ))}
         <RandomMovieButton className="px-4 py-2" variant="bottombar" />
+        <LanguageSwitcher />
       </div>
     </nav>
   );

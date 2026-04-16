@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { FilterChip } from './FilterChip';
 import { FilterRow } from './FilterRow';
 import { RATING_FILTERS } from '../../lib/discover';
@@ -18,12 +19,6 @@ interface DiscoverFiltersProps {
     hasActiveFilters: boolean;
 }
 
-const SOURCE_OPTIONS: { value: SourceFilter; label: string }[] = [
-    { value: 'all',   label: 'Tous'  },
-    { value: 'tmdb',  label: 'TMDB'  },
-    { value: 'local', label: 'Local' },
-];
-
 export function DiscoverFilters({
     source,
     onSourceChange,
@@ -36,12 +31,18 @@ export function DiscoverFilters({
     genres,
     hasActiveFilters,
 }: DiscoverFiltersProps) {
-    const sourceOptions = SOURCE_OPTIONS;
+    const { t } = useTranslation();
+
+    const SOURCE_OPTIONS: { value: SourceFilter; label: string }[] = [
+        { value: 'all',   label: t('discover.sourceAll') },
+        { value: 'tmdb',  label: 'TMDB'  },
+        { value: 'local', label: 'Local' },
+    ];
 
     return (
         <div className="flex flex-col gap-3 bg-cinema-900/40 border border-border/30 rounded-xl p-4">
-            <FilterRow label="Source">
-                {sourceOptions.map(({ value, label }) => (
+            <FilterRow label={t('discover.source')}>
+                {SOURCE_OPTIONS.map(({ value, label }) => (
                     <FilterChip
                         key={value}
                         active={source === value}
@@ -52,9 +53,9 @@ export function DiscoverFilters({
                 ))}
             </FilterRow>
 
-            <FilterRow label="Note">
+            <FilterRow label={t('discover.note')}>
                 <FilterChip active={rating === null} onClick={() => onRatingChange(null)}>
-                    Toutes
+                    {t('discover.noteAll')}
                 </FilterChip>
                 {RATING_FILTERS.map(r => (
                     <FilterChip
@@ -70,12 +71,12 @@ export function DiscoverFilters({
             </FilterRow>
 
             {genres.length > 0 && (
-                <FilterRow label="Genre">
+                <FilterRow label={t('discover.genre')}>
                     <FilterChip
                         active={selectedGenres.length === 0}
                         onClick={onGenresClear}
                     >
-                        Tous
+                        {t('discover.genreAll')}
                     </FilterChip>
                     {genres.map(genre => (
                         <FilterChip
@@ -96,7 +97,7 @@ export function DiscoverFilters({
                         className="text-xs text-cinema-500 hover:text-reel-400 flex items-center gap-1 transition-colors"
                     >
                         <X size={11} />
-                        Réinitialiser
+                        {t('discover.reset')}
                     </button>
                 </div>
             )}

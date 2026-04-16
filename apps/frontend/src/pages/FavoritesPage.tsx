@@ -1,18 +1,20 @@
 import { Bookmark } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { UserListPage } from '../components/user/UserListPage';
 import { useFavorites } from '../hooks/useUserLists';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export function FavoritesPage() {
-    useDocumentTitle('Favorites');
+    const { t } = useTranslation();
+    useDocumentTitle(t('lists.favorites'));
     const { data, isLoading } = useFavorites();
     return (
         <UserListPage
-            title="Favorites"
+            title={t('lists.favorites')}
             icon={<Bookmark size={24} />}
             movies={data}
             isLoading={isLoading}
-            emptyMessage="No favorites yet — bookmark a movie to save it here."
+            emptyMessage={t('lists.emptyFavorites')}
         />
     );
 }

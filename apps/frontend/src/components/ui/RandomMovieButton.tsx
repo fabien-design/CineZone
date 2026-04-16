@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Shuffle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { moviesApi } from "@/api/movies";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ export function RandomMovieButton({
     variant?: "navbar" | "bottombar";
     className?: string;
 }) {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -23,7 +25,7 @@ export function RandomMovieButton({
             const movie = await moviesApi.getRandom();
             navigate(`/movies/${movie.id}`);
         } catch {
-            toast.error("Could not find a random movie. Try again!");
+            toast.error(t('random.error'));
         } finally {
             setLoading(false);
         }
@@ -34,7 +36,7 @@ export function RandomMovieButton({
             <button
                 onClick={handleRandom}
                 disabled={loading}
-                aria-label="Go to a random movie"
+                aria-label={t('random.ariaLabel')}
                 className={cn(
                     "flex flex-col items-center justify-center gap-1 px-4 py-2 text-sm transition-colors",
                     "hover:text-gray-600 disabled:opacity-50",
@@ -45,7 +47,7 @@ export function RandomMovieButton({
                     ? <Loader2 size={24} className="animate-spin" />
                     : <Shuffle size={24} />
                 }
-                <span className="text-xs">Random</span>
+                <span className="text-xs">{t('random.label')}</span>
             </button>
         );
     }
@@ -56,14 +58,14 @@ export function RandomMovieButton({
             size="sm"
             onClick={handleRandom}
             disabled={loading}
-            aria-label="Go to a random movie"
+            aria-label={t('random.ariaLabel')}
             className={cn("gap-2", className)}
         >
             {loading
                 ? <Loader2 size={15} className="animate-spin" />
                 : <Shuffle size={15} />
             }
-            Random
+            {t('random.label')}
         </Button>
     );
 }

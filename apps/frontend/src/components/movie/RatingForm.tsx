@@ -1,6 +1,7 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { ratingSchema, type RatingValues } from "@/lib/schemas/rating";
 import { StarRating } from "../ui/StarRating";
 import { Textarea } from "../ui/textarea";
@@ -18,27 +19,27 @@ import {
 } from "@/components/ui/dialog";
 
 function DeleteConfirmationDialog({ onConfirm }: { onConfirm: () => void }) {
+    const { t } = useTranslation();
     return (
         <Dialog>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="bg-destructive">
-                    Remove Rating
+                    {t('rating.remove')}
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Confirm Deletion</DialogTitle>
+                    <DialogTitle>{t('rating.confirmTitle')}</DialogTitle>
                     <DialogDescription>
-                        Are you sure you want to remove your rating for this
-                        movie? This action cannot be undone.
+                        {t('rating.confirmText')}
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">{t('rating.cancel')}</Button>
                     </DialogClose>
                     <Button variant="destructive" onClick={onConfirm}>
-                        Yes, Remove
+                        {t('rating.yesRemove')}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -61,6 +62,7 @@ export function RatingForm({
     onDeleteReview,
     onSuccess,
 }: RatingFormProps) {
+    const { t } = useTranslation();
     const {
         register,
         control,
@@ -77,7 +79,7 @@ export function RatingForm({
     const onSubmit = async (values: RatingValues) => {
         try {
             await onSubmitForm(values);
-            toast.success(initialRating > 0 ? "Rating updated!" : "Rating submitted!");
+            toast.success(initialRating > 0 ? t('rating.updated') : t('rating.submitted'));
             onSuccess();
         } catch {
             // axios interceptor already shows the error toast
@@ -88,7 +90,7 @@ export function RatingForm({
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
             <div>
                 <p className="text-screen-200 text-sm font-medium mb-3">
-                    Your Rating
+                    {t('rating.yourRating')}
                 </p>
                 <Controller
                     name="rating"
@@ -112,14 +114,14 @@ export function RatingForm({
                     htmlFor="comment"
                     className="text-screen-200 text-sm font-medium block mb-2"
                 >
-                    Review{" "}
+                    {t('rating.review')}{" "}
                     <span className="text-muted-foreground font-normal">
-                        (optional)
+                        {t('rating.optional')}
                     </span>
                 </label>
                 <Textarea
                     id="comment"
-                    placeholder="Share your thoughts about this movie…"
+                    placeholder={t('rating.placeholder')}
                     rows={3}
                     className="bg-cinema-900 border-cinema-700 focus-visible:ring-reel-500 resize-none"
                     {...register("comment")}
@@ -140,9 +142,9 @@ export function RatingForm({
                     {isSubmitting ? (
                         <Loader2 className="animate-spin" />
                     ) : initialRating > 0 ? (
-                        "Update Rating"
+                        t('rating.update')
                     ) : (
-                        "Submit Rating"
+                        t('rating.submit')
                     )}
                 </Button>
                 {initialRating > 0 &&

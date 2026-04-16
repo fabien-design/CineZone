@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Navbar } from '../layout/Navbar';
 import { MovieCard } from '../ui/MovieCard';
 import type { UserListMovie } from '../../api/userLists';
@@ -29,6 +30,7 @@ interface UserListPageProps {
 }
 
 export function UserListPage({ title, icon, movies, isLoading, emptyMessage }: UserListPageProps) {
+    const { t } = useTranslation();
     return (
         <div className="min-h-screen bg-cinema-950">
             <Navbar />
@@ -38,7 +40,7 @@ export function UserListPage({ title, icon, movies, isLoading, emptyMessage }: U
                     <h1 className="text-2xl font-bold text-screen-100">{title}</h1>
                     {movies && movies.length > 0 && (
                         <span className="text-cinema-400 text-sm ml-1">
-                            ({movies.length} film{movies.length > 1 ? 's' : ''})
+                            {t('lists.count', { count: movies.length })}
                         </span>
                     )}
                 </div>

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { localMovieSchema, type LocalMovieValues } from '@/lib/schemas/localMovie';
 import { useGenres } from '@/hooks/useMovies';
 import type { LocalMovie } from '@/types/movie';
@@ -25,6 +26,7 @@ interface MovieFormDialogProps {
 }
 
 export function MovieFormDialog({ open, onOpenChange, movie, onSubmit }: MovieFormDialogProps) {
+    const { t } = useTranslation();
     const { data: genresData } = useGenres();
     const genres = genresData?.genres ?? [];
 
@@ -39,7 +41,6 @@ export function MovieFormDialog({ open, onOpenChange, movie, onSubmit }: MovieFo
         resolver: zodResolver(localMovieSchema),
     });
 
-    // Sync form when movie changes (edit mode) or dialog opens (create mode)
     useEffect(() => {
         if (open) {
             reset(
@@ -86,7 +87,9 @@ export function MovieFormDialog({ open, onOpenChange, movie, onSubmit }: MovieFo
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>{movie ? 'Modifier le film' : 'Ajouter un film'}</DialogTitle>
+                    <DialogTitle>
+                        {movie ? t('admin.form.editTitle') : t('admin.form.addTitle')}
+                    </DialogTitle>
                 </DialogHeader>
 
                 <form
@@ -94,12 +97,11 @@ export function MovieFormDialog({ open, onOpenChange, movie, onSubmit }: MovieFo
                     onSubmit={handleSubmit(handleFormSubmit)}
                     className="flex flex-col gap-4 py-2"
                 >
-                    {/* Title */}
                     <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="mf-title">Titre *</Label>
+                        <Label htmlFor="mf-title">{t('admin.form.titleLabel')}</Label>
                         <Input
                             id="mf-title"
-                            placeholder="Ex: Inception"
+                            placeholder={t('admin.form.titlePlaceholder')}
                             aria-invalid={!!errors.title}
                             {...register('title')}
                         />
@@ -108,20 +110,18 @@ export function MovieFormDialog({ open, onOpenChange, movie, onSubmit }: MovieFo
                         )}
                     </div>
 
-                    {/* Overview */}
                     <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="mf-overview">Synopsis</Label>
+                        <Label htmlFor="mf-overview">{t('admin.form.overviewLabel')}</Label>
                         <Textarea
                             id="mf-overview"
-                            placeholder="Résumé du film..."
+                            placeholder={t('admin.form.overviewPlaceholder')}
                             className="min-h-24"
                             {...register('overview')}
                         />
                     </div>
 
-                    {/* Poster URL */}
                     <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="mf-poster">URL de l'affiche</Label>
+                        <Label htmlFor="mf-poster">{t('admin.form.posterLabel')}</Label>
                         <Input
                             id="mf-poster"
                             type="url"
@@ -134,9 +134,8 @@ export function MovieFormDialog({ open, onOpenChange, movie, onSubmit }: MovieFo
                         )}
                     </div>
 
-                    {/* Backdrop URL */}
                     <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="mf-backdrop">URL du backdrop</Label>
+                        <Label htmlFor="mf-backdrop">{t('admin.form.backdropLabel')}</Label>
                         <Input
                             id="mf-backdrop"
                             type="url"
@@ -149,14 +148,13 @@ export function MovieFormDialog({ open, onOpenChange, movie, onSubmit }: MovieFo
                         )}
                     </div>
 
-                    {/* Release date + Rating — side by side */}
                     <div className="grid grid-cols-2 gap-3">
                         <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="mf-date">Date de sortie</Label>
+                            <Label htmlFor="mf-date">{t('admin.form.releaseDateLabel')}</Label>
                             <Input id="mf-date" type="date" {...register('release_date')} />
                         </div>
                         <div className="flex flex-col gap-1.5">
-                            <Label htmlFor="mf-rating">Note (0–10)</Label>
+                            <Label htmlFor="mf-rating">{t('admin.form.ratingLabel')}</Label>
                             <Input
                                 id="mf-rating"
                                 type="number"
@@ -175,10 +173,9 @@ export function MovieFormDialog({ open, onOpenChange, movie, onSubmit }: MovieFo
                         </div>
                     </div>
 
-                    {/* Genres */}
                     {genres.length > 0 && (
                         <div className="flex flex-col gap-2">
-                            <Label>Genres</Label>
+                            <Label>{t('admin.form.genresLabel')}</Label>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-1">
                                 {genres.map(genre => (
                                     <label
@@ -204,9 +201,9 @@ export function MovieFormDialog({ open, onOpenChange, movie, onSubmit }: MovieFo
                         {isSubmitting ? (
                             <Loader2 className="animate-spin" />
                         ) : movie ? (
-                            'Enregistrer'
+                            t('admin.form.save')
                         ) : (
-                            'Ajouter'
+                            t('admin.form.add')
                         )}
                     </Button>
                 </DialogFooter>
