@@ -6,6 +6,7 @@ import {
     searchMulti,
     getGenres,
     discoverMovies,
+    getPopularMovies,
 } from "../services/tmdb.js";
 import {
     createMovie,
@@ -65,6 +66,19 @@ router.get("/search", async (req, res, next) => {
         const localData = await searchLocalMovies(query);
         const data = await searchMulti(query);
         res.json({ local: localData, tmdb: data });
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.get("/random", async (_req, res, next) => {
+    try {
+        const page = Math.floor(Math.random() * 10) + 1;
+        const data = await getPopularMovies(page);
+        const movies = data.results.filter(m => m.poster_path);
+        if (!movies.length) return res.status(404).json({ message: "No movie found" });
+        const movie = movies[Math.floor(Math.random() * movies.length)];
+        res.json({ id: movie.id, title: movie.title });
     } catch (err) {
         next(err);
     }

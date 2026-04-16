@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Navigate } from 'react-router';
 import { Plus, Pencil, Trash2, Loader2, Film } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,6 +25,7 @@ import type { LocalMovieValues } from '@/lib/schemas/localMovie';
 import BottomBar from '@/components/layout/BottomBar';
 
 export function AdminPage() {
+    useDocumentTitle('Administration');
     const { user, isLoading: isAuthLoading } = useAuth();
     const { data: movies = [], isLoading: isMoviesLoading } = useLocalMovies();
 
@@ -89,7 +91,7 @@ export function AdminPage() {
         <div className="min-h-screen bg-cinema-950">
             <Navbar />
 
-            <main className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-16 flex flex-col gap-8">
+            <main id="main-content" className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-16 flex flex-col gap-8">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -121,22 +123,22 @@ export function AdminPage() {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-border/40 bg-cinema-900/50">
-                                    <th className="text-left px-4 py-3 text-cinema-400 font-medium w-16">
+                                    <th scope="col" className="text-left px-4 py-3 text-cinema-400 font-medium w-16">
                                         Affiche
                                     </th>
-                                    <th className="text-left px-4 py-3 text-cinema-400 font-medium">
+                                    <th scope="col" className="text-left px-4 py-3 text-cinema-400 font-medium">
                                         Titre
                                     </th>
-                                    <th className="text-left px-4 py-3 text-cinema-400 font-medium hidden md:table-cell">
+                                    <th scope="col" className="text-left px-4 py-3 text-cinema-400 font-medium hidden md:table-cell">
                                         Genres
                                     </th>
-                                    <th className="text-left px-4 py-3 text-cinema-400 font-medium w-20 hidden sm:table-cell">
+                                    <th scope="col" className="text-left px-4 py-3 text-cinema-400 font-medium w-20 hidden sm:table-cell">
                                         Note
                                     </th>
-                                    <th className="text-left px-4 py-3 text-cinema-400 font-medium w-32 hidden lg:table-cell">
+                                    <th scope="col" className="text-left px-4 py-3 text-cinema-400 font-medium w-32 hidden lg:table-cell">
                                         Ajouté le
                                     </th>
-                                    <th className="px-4 py-3 w-24" />
+                                    <th scope="col" className="px-4 py-3 w-24"><span className="sr-only">Actions</span></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -213,7 +215,7 @@ export function AdminPage() {
                                                     variant="ghost"
                                                     size="icon-sm"
                                                     onClick={() => openEdit(movie)}
-                                                    title="Edit"
+                                                    aria-label={`Edit ${movie.title}`}
                                                 >
                                                     <Pencil size={14} />
                                                 </Button>
@@ -221,7 +223,7 @@ export function AdminPage() {
                                                     variant="destructive"
                                                     size="icon-sm"
                                                     onClick={() => setDeletingMovie(movie)}
-                                                    title="Delete"
+                                                    aria-label={`Delete ${movie.title}`}
                                                 >
                                                     <Trash2 size={14} />
                                                 </Button>

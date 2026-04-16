@@ -2,6 +2,13 @@ import axios from "axios";
 import { navigate } from "@/lib/navigation";
 import { toast } from "sonner";
 
+declare module "axios" {
+    interface AxiosRequestConfig {
+        suppressErrorToast?: boolean;
+        suppressSuccessToast?: boolean;
+    }
+}
+
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL + "/api",
     withCredentials: true,
@@ -13,7 +20,7 @@ let pendingQueue: Array<() => void> = [];
 
 api.interceptors.response.use(
     (res) => {
-        if (res.data?.message) {
+        if (res.data?.message && !res.config.suppressSuccessToast) {
             toast.success(res.data.message);
         }
         return res;
@@ -22,10 +29,12 @@ api.interceptors.response.use(
         const originalRequest = err.config;
 
         if (err.response?.status !== 401 || originalRequest._retry) {
-            toast.error(
-                err.response?.data?.message ||
-                    "An error occurred. Please try again.",
-            );
+            if (!originalRequest.suppressErrorToast) {
+                toast.error(
+                    err.response?.data?.message ||
+                        "An error occurred. Please try again.",
+                );
+            }
             return Promise.reject(err);
         }
 

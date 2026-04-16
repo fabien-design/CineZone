@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useNavigate, useSearchParams } from 'react-router';
 import { Film } from 'lucide-react';
 import { LoginForm } from '@/components/auth/LoginForm';
@@ -14,6 +15,7 @@ export function AuthPage({ choosedTab }: Props) {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') ?? '/';
   const [tab, setTab] = useState<Tab>(choosedTab ?? 'login');
+  useDocumentTitle(tab === 'login' ? 'Log In' : 'Register');
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">

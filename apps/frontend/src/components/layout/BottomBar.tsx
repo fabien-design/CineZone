@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router';
 import { Dices, Home, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { RandomMovieButton } from '../ui/RandomMovieButton';
 
 export default function BottomBar() {
   const location = useLocation();
@@ -8,7 +9,6 @@ export default function BottomBar() {
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/discover', label: 'Discover', icon: Search },
-    { path: '/random', label: 'Random', icon: Dices },
   ];
 
   return (
@@ -29,6 +29,7 @@ export default function BottomBar() {
             <span className="text-xs">{label}</span>
           </Link>
         ))}
+        <RandomMovieButton className="px-4 py-2" variant="bottombar" />
       </div>
     </nav>
   );

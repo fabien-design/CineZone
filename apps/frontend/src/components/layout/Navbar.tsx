@@ -1,7 +1,8 @@
 import { Link, NavLink } from "react-router";
 import { Bookmark, ClockPlus, Eye, LogOut, ShieldUser, User } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
+import { RandomMovieButton } from "../ui/RandomMovieButton";
 import { useAuth } from "@/hooks/useAuth";
 import {
     DropdownMenu,
@@ -53,6 +54,7 @@ export function Navbar() {
                             </NavLink>
                         </li>
                     ))}
+                    <RandomMovieButton />
                 </ul>
 
                 <div className="flex items-center gap-3">
@@ -176,12 +178,12 @@ export function Navbar() {
                             </>
                         ) : (
                             <>
-                                <Button variant="ghost" size="sm">
-                                    <Link to="/login">Log In</Link>
-                                </Button>
-                                <Button size="sm">
-                                    <Link to="/register">Sign Up</Link>
-                                </Button>
+                                <Link to="/login" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+                                    Log In
+                                </Link>
+                                <Link to="/register" className={buttonVariants({ size: 'sm' })}>
+                                    Sign Up
+                                </Link>
                             </>
                         ))}
                 </div>
