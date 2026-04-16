@@ -152,24 +152,24 @@ export async function refreshToken(req, res) {
         const refreshToken = req.cookies.refreshToken;
 
         // Check if the refresh token has been revoked
-        const user = await database.query(
+        const [[userData]] = await database.query(
             "SELECT refresh_token, role FROM users WHERE id = ?",
             [userId],
         );
 
-        if (!user || !user.refreshToken) {
+        if (!userData || !userData.refresh_token) {
             return res.status(401).json({ message: "Invalid refresh token" });
         }
 
         // Check if the refresh token in the database matches the one from the client
-        if (user.refreshToken !== refreshToken) {
+        if (userData.refresh_token !== refreshToken) {
             return res.status(401).json({ message: "Invalid refresh token" });
         }
 
         const newAccessToken = jwt.sign(
-            { 
+            {
                 id: userId,
-                role: user.role,
+                role: userData.role,
             },
             authConfig.secret,
             { expiresIn: authConfig.secret_expires_in },

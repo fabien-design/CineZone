@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useParams, Link } from 'react-router';
 import { ChevronLeft } from 'lucide-react';
 import { useMovieById, useLocalMovieById } from '../hooks/useMovies';
@@ -13,6 +14,7 @@ import { MovieRow } from '../components/movie/MovieRow';
 import { SectionHeader } from '../components/ui/SectionHeader';
 import { useAuth } from '@/hooks/useAuth';
 import { useRating } from '@/hooks/useRating';
+import { useListStatus, useToggleList } from '@/hooks/useUserLists';
 import { ReviewList } from '@/components/movie/ReviewList';
 import type { MovieRef } from '@/types/movie';
 import BottomBar from '@/components/layout/BottomBar';
@@ -32,7 +34,16 @@ export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
     source === 'local' ? localQuery : tmdbQuery;
 
   const movieRef: MovieRef = { source, id: movieId };
+  useDocumentTitle(movie?.title ?? '');
   const { movieRatings, isLoadingRatings, myRating, upsert: upsertRating, remove: removeRating } = useRating(movieRef, isAuthenticated);
+
+  const { data: favStatus }       = useListStatus('favorites', movieRef, isAuthenticated);
+  const { data: watchlistStatus } = useListStatus('watchlist',  movieRef, isAuthenticated);
+  const { data: watchedStatus }   = useListStatus('watched',    movieRef, isAuthenticated);
+
+  const toggleFavorite  = useToggleList('favorites', movieRef);
+  const toggleWatchlist = useToggleList('watchlist',  movieRef);
+  const toggleWatched   = useToggleList('watched',    movieRef);
 
   const trailerRef = useRef<HTMLDivElement>(null);
   const scrollToTrailer = () =>
@@ -66,6 +77,7 @@ export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
 
   const heroData = source === 'local' && localQuery.data
     ? {
+        source: 'local' as const,
         title:         localQuery.data.title,
         poster_path:   localQuery.data.poster_url,
         backdrop_path: localQuery.data.backdrop_url,
@@ -95,14 +107,16 @@ export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
       <MovieDetailHero
         movie={heroData}
         isAuthenticated={isAuthenticated}
-        isFavorite={false}       // TODO: wire up when auth is ready
-        isInWatchlist={false}    // TODO: wire up when auth is ready
-        onToggleFavorite={() => {}}
-        onToggleWatchlist={() => {}}
+        isFavorite={favStatus?.inList ?? false}
+        isInWatchlist={watchlistStatus?.inList ?? false}
+        isWatched={watchedStatus?.inList ?? false}
+        onToggleFavorite={() => toggleFavorite.mutate(favStatus?.inList ?? false)}
+        onToggleWatchlist={() => toggleWatchlist.mutate(watchlistStatus?.inList ?? false)}
+        onToggleWatched={() => toggleWatched.mutate(watchedStatus?.inList ?? false)}
         onWatchTrailer={scrollToTrailer}
       />
 
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-12 flex flex-col gap-14">
+      <main id="main-content" className="max-w-7xl mx-auto px-4 md:px-8 py-12 flex flex-col gap-14">
         {/* Back link */}
         <Link
           to="/"

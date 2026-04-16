@@ -17,7 +17,7 @@ export async function ensureMovieExists(tmdbId) {
     const movie = await getMovieById(tmdbId);
 
     const [result] = await database.query(
-        `INSERT INTO movies (tmdb_id, title, overview, poster_url, backdrop_url, release_date, vote_average, vote_count, is_custom)
+        `INSERT IGNORE INTO movies (tmdb_id, title, overview, poster_url, backdrop_url, release_date, vote_average, vote_count, is_custom)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)`,
         [
             movie.id,
@@ -31,7 +31,11 @@ export async function ensureMovieExists(tmdbId) {
         ],
     );
 
-    const localId = result.insertId;
+    // insertId === 0 means INSERT IGNORE skipped a duplicate (race condition)
+    const localId = result.insertId || (await database.query(
+        'SELECT id FROM movies WHERE tmdb_id = ? LIMIT 1',
+        [movie.id],
+    ).then(([[row]]) => row.id));
 
     if (movie.genres?.length) {
         const genreValues = movie.genres.map(g => [localId, g.id]);
