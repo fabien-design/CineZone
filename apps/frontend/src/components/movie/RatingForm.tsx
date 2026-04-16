@@ -24,22 +24,22 @@ function DeleteConfirmationDialog({ onConfirm }: { onConfirm: () => void }) {
         <Dialog>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="bg-destructive">
-                    {t('rating.remove')}
+                    {t("rating.remove")}
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{t('rating.confirmTitle')}</DialogTitle>
+                    <DialogTitle>{t("rating.confirmTitle")}</DialogTitle>
                     <DialogDescription>
-                        {t('rating.confirmText')}
+                        {t("rating.confirmText")}
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Button variant="outline">{t('rating.cancel')}</Button>
+                        <Button variant="outline">{t("rating.cancel")}</Button>
                     </DialogClose>
                     <Button variant="destructive" onClick={onConfirm}>
-                        {t('rating.yesRemove')}
+                        {t("rating.yesRemove")}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -79,7 +79,9 @@ export function RatingForm({
     const onSubmit = async (values: RatingValues) => {
         try {
             await onSubmitForm(values);
-            toast.success(initialRating > 0 ? t('rating.updated') : t('rating.submitted'));
+            toast.success(
+                initialRating > 0 ? t("rating.updated") : t("rating.submitted"),
+            );
             onSuccess();
         } catch {
             // axios interceptor already shows the error toast
@@ -90,7 +92,7 @@ export function RatingForm({
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
             <div>
                 <p className="text-screen-200 text-sm font-medium mb-3">
-                    {t('rating.yourRating')}
+                    {t("rating.yourRating")}
                 </p>
                 <Controller
                     name="rating"
@@ -114,14 +116,14 @@ export function RatingForm({
                     htmlFor="comment"
                     className="text-screen-200 text-sm font-medium block mb-2"
                 >
-                    {t('rating.review')}{" "}
+                    {t("rating.review")}{" "}
                     <span className="text-muted-foreground font-normal">
-                        {t('rating.optional')}
+                        {t("rating.optional")}
                     </span>
                 </label>
                 <Textarea
                     id="comment"
-                    placeholder={t('rating.placeholder')}
+                    placeholder={t("rating.placeholder")}
                     rows={3}
                     className="bg-cinema-900 border-cinema-700 focus-visible:ring-reel-500 resize-none"
                     {...register("comment")}
@@ -142,13 +144,14 @@ export function RatingForm({
                     {isSubmitting ? (
                         <Loader2 className="animate-spin" />
                     ) : initialRating > 0 ? (
-                        t('rating.update')
+                        t("rating.update")
                     ) : (
-                        t('rating.submit')
+                        t("rating.submit")
                     )}
                 </Button>
-                {initialRating > 0 &&
-                    DeleteConfirmationDialog({ onConfirm: onDeleteReview })}
+                {initialRating > 0 && (
+                    <DeleteConfirmationDialog onConfirm={onDeleteReview} />
+                )}
             </div>
         </form>
     );

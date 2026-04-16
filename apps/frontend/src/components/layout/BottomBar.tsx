@@ -3,7 +3,6 @@ import { Home, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { RandomMovieButton } from '../ui/RandomMovieButton';
-import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
 export default function BottomBar() {
   const location = useLocation();
@@ -33,7 +32,6 @@ export default function BottomBar() {
           </Link>
         ))}
         <RandomMovieButton className="px-4 py-2" variant="bottombar" />
-        <LanguageSwitcher />
       </div>
     </nav>
   );
