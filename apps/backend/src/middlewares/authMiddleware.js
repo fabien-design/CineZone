@@ -11,6 +11,7 @@ export async function authenticateUser(req, res, next) {
     try {
         const decodedToken = jwt.verify(token, authConfig.secret);
         req.userId = decodedToken.id;
+        req.userIsAdmin = decodedToken.role;
         next();
     } catch (error) {
         console.error("Authentication failed:", error); 
@@ -30,6 +31,7 @@ export async function refreshTokenValidation(req, res, next) {
             authConfig.refresh_secret,
         );
         req.userId = decodedToken.id;
+        req.userIsAdmin = decodedToken.role;
         next();
     } catch (error) {
         console.error("Refresh Token authentication failed:", error);

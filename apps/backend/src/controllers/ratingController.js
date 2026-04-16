@@ -1,20 +1,8 @@
 import database from '../services/database.js';
+import { ensureMovieExists } from '../services/movieSync.js';
 
-/**
- * For a TMDB-source request: find or create a row in `movies` for that tmdb_id,
- * then return the local movies.id.
- */
 async function resolveMovieId(tmdbId) {
-  await database.query(
-    'INSERT IGNORE INTO movies (tmdb_id) VALUES (?)',
-    [tmdbId],
-  );
-  const [[row]] = await database.query(
-    'SELECT id FROM movies WHERE tmdb_id = ? LIMIT 1',
-    [tmdbId],
-  );
-  if (!row) throw new Error(`Movie with tmdb_id ${tmdbId} not found`);
-  return row.id;
+  return ensureMovieExists(Number(tmdbId));
 }
 
 async function getMovieId(source, rawId) {

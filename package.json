@@ -12,9 +12,5 @@
     "dev": "npm run dev:backend & npm run dev:frontend",
     "install:all": "npm install && npm install --workspace=apps/frontend && npm install --workspace=apps/backend",
     "lint": "npm run lint --workspaces"
-  },
-  "dependencies": {
-    "dotenv": "^17.3.1",
-    "express-validator": "^7.3.1"
   }
 }

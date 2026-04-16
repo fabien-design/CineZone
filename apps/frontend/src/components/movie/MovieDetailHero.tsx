@@ -1,12 +1,12 @@
-import { Heart, Bookmark, Play } from 'lucide-react';
+import { Heart, Bookmark, Play, ClockPlus } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/button';
 import { formatRating, formatRuntime, formatYear, getBackdropUrl, getPosterUrl } from '../../lib/tmdb';
 import { GenreBadge } from '../ui/GenreBadge';
-import type { MovieDetail } from '../../types/movie';
+import type { HeroMovieData } from '../../types/movie';
 
 interface MovieDetailHeroProps {
-  movie: MovieDetail;
+  movie: HeroMovieData;
   isAuthenticated: boolean;
   isFavorite: boolean;
   isInWatchlist: boolean;
@@ -78,12 +78,14 @@ export function MovieDetailHero({
               <span aria-label={`Rated ${formatRating(movie.vote_average)} out of 10`}>
                 {formatRating(movie.vote_average)}
               </span>
-              <span className="text-muted-foreground font-normal">
-                ({movie.vote_count.toLocaleString()})
-              </span>
+              {movie.vote_count != null && (
+                <span className="text-muted-foreground font-normal">
+                  ({movie.vote_count.toLocaleString()})
+                </span>
+              )}
             </span>
             <span aria-hidden>·</span>
-            <span>{formatYear(movie.release_date)}</span>
+            <span>{formatYear(movie.release_date ?? undefined)}</span>
             {movie.runtime && (
               <>
                 <span aria-hidden>·</span>
@@ -110,7 +112,7 @@ export function MovieDetailHero({
                 isFavorite && 'border-curtain-500 text-curtain-300 bg-curtain-600/10',
               )}
             >
-              <Heart size={15} fill={isFavorite ? 'currentColor' : 'none'} />
+              <Bookmark size={15} fill={isFavorite ? 'currentColor' : 'none'} />
               {isFavorite ? 'Saved' : 'Favorite'}
             </Button>
 
@@ -124,7 +126,7 @@ export function MovieDetailHero({
                 isInWatchlist && 'border-reel-500 text-reel-300 bg-reel-500/10',
               )}
             >
-              <Bookmark size={15} fill={isInWatchlist ? 'currentColor' : 'none'} />
+              <ClockPlus size={15} fill={isInWatchlist ? 'currentColor' : 'none'} />
               {isInWatchlist ? 'In Watchlist' : 'Watchlist'}
             </Button>
           </div>

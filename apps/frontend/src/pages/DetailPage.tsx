@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useParams, Link } from 'react-router';
 import { ChevronLeft } from 'lucide-react';
-import { useMovieById } from '../hooks/useMovies';
+import { useMovieById, useLocalMovieById } from '../hooks/useMovies';
 import { formatMoney } from '../lib/tmdb';
 import { Navbar } from '../components/layout/Navbar';
 import { HeroBannerSkeleton } from '../components/movie/HeroBannerSkeleton';
@@ -15,17 +15,23 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRating } from '@/hooks/useRating';
 import { ReviewList } from '@/components/movie/ReviewList';
 import type { MovieRef } from '@/types/movie';
+import BottomBar from '@/components/layout/BottomBar';
 
-export function DetailPage() {
+interface DetailPageProps {
+  source?: 'tmdb' | 'local';
+}
+
+export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
   const { id } = useParams<{ id: string }>();
   const movieId = Number(id);
 
   const { isAuthenticated } = useAuth();
-  const { data: movie, isLoading: isLoadingMovie, isError } = useMovieById(movieId);
+  const tmdbQuery = useMovieById(movieId, source === 'tmdb');
+  const localQuery = useLocalMovieById(movieId, source === 'local');
+  const { data: movie, isLoading: isLoadingMovie, isError } =
+    source === 'local' ? localQuery : tmdbQuery;
 
-  // DetailPage always shows TMDB movies. If the movie is ever saved to the local DB,
-  // pass { source: 'local', id: movie.localId } instead so ratings share the same row.
-  const movieRef: MovieRef = { source: 'tmdb', id: movieId };
+  const movieRef: MovieRef = { source, id: movieId };
   const { movieRatings, isLoadingRatings, myRating, upsert: upsertRating, remove: removeRating } = useRating(movieRef, isAuthenticated);
 
   const trailerRef = useRef<HTMLDivElement>(null);
@@ -37,6 +43,7 @@ export function DetailPage() {
       <div className="min-h-screen bg-cinema-950">
         <Navbar />
         <HeroBannerSkeleton />
+        <BottomBar />
       </div>
     );
   }
@@ -49,27 +56,44 @@ export function DetailPage() {
         <Link to="/" className="text-reel-400 hover:text-reel-300 text-sm underline">
           Back to Home
         </Link>
+        <BottomBar />
       </div>
     );
   }
 
-  const cast = movie.credits?.cast?.slice(0, 15) ?? [];
-  const recommendations = movie.recommendations?.results?.slice(0, 12) ?? [];
-  const hasTrailerSection = movie.videos?.results?.some(v => v.site === 'YouTube');
+  // Narrow to MovieDetail for TMDB-only fields
+  const tmdbMovie = source === 'tmdb' ? tmdbQuery.data : undefined;
+
+  const heroData = source === 'local' && localQuery.data
+    ? {
+        title:         localQuery.data.title,
+        poster_path:   localQuery.data.poster_url,
+        backdrop_path: localQuery.data.backdrop_url,
+        vote_average:  localQuery.data.vote_average ?? 0,
+        release_date:  localQuery.data.release_date,
+        genres:        localQuery.data.genres,
+      }
+    : tmdbMovie;
+
+  const cast            = tmdbMovie?.credits?.cast?.slice(0, 15) ?? [];
+  const recommendations = tmdbMovie?.recommendations?.results?.slice(0, 12) ?? [];
+  const hasTrailerSection = tmdbMovie?.videos?.results?.some(v => v.site === 'YouTube') ?? false;
 
   const extraInfo: { label: string; value: string }[] = [
-    { label: 'Status', value: movie.status },
-    { label: 'Budget', value: formatMoney(movie.budget) },
-    { label: 'Revenue', value: formatMoney(movie.revenue) },
-    { label: 'Original Language', value: movie.original_language?.toUpperCase() ?? 'N/A' },
+    { label: 'Status',            value: tmdbMovie?.status ?? '' },
+    { label: 'Budget',            value: tmdbMovie ? formatMoney(tmdbMovie.budget) : '' },
+    { label: 'Revenue',           value: tmdbMovie ? formatMoney(tmdbMovie.revenue) : '' },
+    { label: 'Original Language', value: tmdbMovie?.original_language?.toUpperCase() ?? '' },
   ].filter(item => item.value && item.value !== 'N/A');
+
+  if (!heroData) return null;
 
   return (
     <div className="min-h-screen bg-cinema-950">
       <Navbar />
 
       <MovieDetailHero
-        movie={movie}
+        movie={heroData}
         isAuthenticated={isAuthenticated}
         isFavorite={false}       // TODO: wire up when auth is ready
         isInWatchlist={false}    // TODO: wire up when auth is ready
@@ -112,12 +136,8 @@ export function DetailPage() {
         {/* User activity: rating, review */}
         <UserActions
           isAuthenticated={isAuthenticated}
-          isFavorite={false}
-          isInWatchlist={false}
           initialRating={myRating?.score ?? 0}
           initialComment={myRating?.comment ?? ''}
-          onToggleFavorite={() => {}}
-          onToggleWatchlist={() => {}}
           onSubmitRating={async (values) => { await upsertRating(values); }}
           onDeleteReview={async () => { await removeRating(); }}
         />
@@ -134,9 +154,9 @@ export function DetailPage() {
         {cast.length > 0 && <CastSection cast={cast} />}
 
         {/* Trailer */}
-        {hasTrailerSection && (
+        {hasTrailerSection && tmdbMovie && (
           <div ref={trailerRef}>
-            <TrailerSection videos={movie.videos.results} />
+            <TrailerSection videos={tmdbMovie.videos.results} />
           </div>
         )}
 
@@ -148,6 +168,7 @@ export function DetailPage() {
           </section>
         )}
       </main>
+      <BottomBar />
     </div>
   );
 }

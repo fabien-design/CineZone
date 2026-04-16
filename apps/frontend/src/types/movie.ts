@@ -8,8 +8,34 @@ export type MovieRef =
     | { source: "tmdb"; id: number }
     | { source: "local"; id: number };
 
+/** Movie stored in the local DB (is_custom = 1). */
+export interface LocalMovie {
+    id: number;
+    title: string;
+    overview: string | null;
+    poster_url: string | null;
+    backdrop_url: string | null;
+    release_date: string | null;
+    vote_average: number | null;
+    is_custom: 1;
+    created_at: string;
+    genres: Genre[];
+}
+
+/** Payload sent to create or update a local movie. */
+export interface LocalMoviePayload {
+    title: string;
+    overview?: string | null;
+    poster_url?: string | null;
+    backdrop_url?: string | null;
+    release_date?: string | null;
+    vote_average?: number | null;
+    genre_ids?: number[];
+}
+
 export interface Movie {
     id: number;
+    source?: "tmdb" | "local";
     title: string;
     overview: string;
     poster_path: string | null;
@@ -60,6 +86,23 @@ export interface Video {
     site: "YouTube" | "Vimeo" | string;
     type: "Trailer" | "Teaser" | "Clip" | "Featurette" | string;
     official: boolean;
+}
+
+/**
+ * Minimal shape required by MovieDetailHero.
+ * Both MovieDetail and LocalMovie can be adapted to this type.
+ */
+export interface HeroMovieData {
+    title: string;
+    poster_path: string | null;
+    backdrop_path: string | null;
+    vote_average: number;
+    vote_count?: number;
+    release_date: string | null;
+    runtime?: number | null;
+    tagline?: string | null;
+    genres: Genre[];
+    videos?: { results: Video[] };
 }
 
 export interface MovieDetail extends Movie {

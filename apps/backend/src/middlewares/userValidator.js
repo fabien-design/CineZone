@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import { body } from "express-validator";
 import database from "../services/database.js";
-import handleValidationErrors from "./handleValidationErrors.js";
+import { handleValidationErrors } from "./handleValidationErrors.js";
 
 export async function checkEmailNotTaken(req, res, next) {
     try {

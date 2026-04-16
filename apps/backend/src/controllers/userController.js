@@ -29,7 +29,7 @@ export async function login(req, res) {
 
     try {
         const [users] = await database.query(
-            "SELECT id, password FROM users WHERE email =? LIMIT 1",
+            "SELECT id, role, password FROM users WHERE email =? LIMIT 1",
             [email],
         );
 
@@ -51,6 +51,7 @@ export async function login(req, res) {
         const token = jwt.sign(
             {
                 id: user.id,
+                role: user.role,
             },
             authConfig.secret,
             {
@@ -61,6 +62,7 @@ export async function login(req, res) {
         const refreshToken = jwt.sign(
             {
                 id: user.id,
+                role: user.role,
             },
             authConfig.refresh_secret,
             {
@@ -91,6 +93,7 @@ export async function login(req, res) {
             id: user.id,
             username: user.username,
             email: user.email,
+            role: user.role,
         });
     } catch (err) {
         console.error(err);
@@ -150,7 +153,7 @@ export async function refreshToken(req, res) {
 
         // Check if the refresh token has been revoked
         const user = await database.query(
-            "SELECT refresh_token FROM users WHERE id = ?",
+            "SELECT refresh_token, role FROM users WHERE id = ?",
             [userId],
         );
 
@@ -164,7 +167,10 @@ export async function refreshToken(req, res) {
         }
 
         const newAccessToken = jwt.sign(
-            { id: userId },
+            { 
+                id: userId,
+                role: user.role,
+            },
             authConfig.secret,
             { expiresIn: authConfig.secret_expires_in },
         );
