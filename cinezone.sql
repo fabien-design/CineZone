@@ -61,16 +61,41 @@ CREATE TABLE movie_genres (
 );
 
 -- ------------------------------------------------------------
+-- GENRES (seed TMDB)
+-- ------------------------------------------------------------
+INSERT INTO genres (id, name) VALUES
+  (28,    'Action'),
+  (12,    'Adventure'),
+  (16,    'Animation'),
+  (35,    'Comedy'),
+  (80,    'Crime'),
+  (99,    'Documentary'),
+  (18,    'Drama'),
+  (10751, 'Family'),
+  (14,    'Fantasy'),
+  (36,    'History'),
+  (27,    'Horror'),
+  (10402, 'Music'),
+  (9648,  'Mystery'),
+  (10749, 'Romance'),
+  (878,   'Science Fiction'),
+  (10770, 'TV Movie'),
+  (53,    'Thriller'),
+  (10752, 'War'),
+  (37,    'Western');
+
+-- ------------------------------------------------------------
 -- FAVORITES
 -- ------------------------------------------------------------
 CREATE TABLE favorites (
   id           INT UNSIGNED    NOT NULL AUTO_INCREMENT,
   user_id      INT UNSIGNED    NOT NULL,
-  tmdb_id      INT UNSIGNED    NOT NULL,               -- on stocke l'id TMDB directement
+  movie_id     INT UNSIGNED    NOT NULL,
   added_at     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY uq_fav (user_id, tmdb_id),
-  CONSTRAINT fk_fav_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  UNIQUE KEY uq_fav (user_id, movie_id),
+  CONSTRAINT fk_fav_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
+  CONSTRAINT fk_fav_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE
 );
 
 -- ------------------------------------------------------------
@@ -79,11 +104,12 @@ CREATE TABLE favorites (
 CREATE TABLE watchlist (
   id           INT UNSIGNED    NOT NULL AUTO_INCREMENT,
   user_id      INT UNSIGNED    NOT NULL,
-  tmdb_id      INT UNSIGNED    NOT NULL,
+  movie_id     INT UNSIGNED    NOT NULL,
   added_at     TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY uq_wl (user_id, tmdb_id),
-  CONSTRAINT fk_wl_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  UNIQUE KEY uq_wl (user_id, movie_id),
+  CONSTRAINT fk_wl_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
+  CONSTRAINT fk_wl_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE
 );
 
 -- ------------------------------------------------------------
@@ -92,14 +118,15 @@ CREATE TABLE watchlist (
 CREATE TABLE ratings (
   id           INT UNSIGNED    NOT NULL AUTO_INCREMENT,
   user_id      INT UNSIGNED    NOT NULL,
-  tmdb_id      INT UNSIGNED    NOT NULL,
+  movie_id     INT UNSIGNED    NOT NULL,
   score        TINYINT UNSIGNED NOT NULL,              -- 1 à 10
   comment      TEXT            NULL,
   created_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY uq_rating (user_id, tmdb_id),
-  CONSTRAINT fk_rat_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY uq_rating (user_id, movie_id),
+  CONSTRAINT fk_rat_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
+  CONSTRAINT fk_rat_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
   CONSTRAINT chk_score CHECK (score BETWEEN 1 AND 10)
 );
 
@@ -109,10 +136,12 @@ CREATE TABLE ratings (
 CREATE TABLE watch_history (
   id           INT UNSIGNED    NOT NULL AUTO_INCREMENT,
   user_id      INT UNSIGNED    NOT NULL,
-  tmdb_id      INT UNSIGNED    NOT NULL,
+  movie_id     INT UNSIGNED    NOT NULL,
   watched_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  CONSTRAINT fk_wh_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  UNIQUE KEY uq_watched (user_id, movie_id),
+  CONSTRAINT fk_wh_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
+  CONSTRAINT fk_wh_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_wh_user ON watch_history(user_id);

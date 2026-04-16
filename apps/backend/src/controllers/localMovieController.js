@@ -125,14 +125,75 @@ export async function deleteMovie(req, res) {
     }
 }
 
+export async function getLocalMovie(req, res) {
+    const id = parseInt(req.params.id);
+
+    try {
+        const [[movie]] = await database.query(
+            "SELECT * FROM movies WHERE id = ?",
+            [id],
+        );
+        if (!movie) return res.status(404).json({ message: "Movie not found" });
+
+        const [genres] = await database.query(
+            `SELECT genres.id, genres.name
+             FROM genres
+             INNER JOIN movie_genres mg ON genres.id = mg.genre_id
+             WHERE mg.movie_id = ?`,
+            [id],
+        );
+
+        return res.status(200).json({ ...movie, genres });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "An error has occurred" });
+    }
+}
+
 export async function getLocalMovies(req, res) {
     try {
         const [movies] = await database.query(
             "SELECT * FROM movies WHERE is_custom = 1 ORDER BY created_at DESC",
         );
-        return res.status(200).json(movies);
+
+        if (movies.length === 0) return res.status(200).json([]);
+
+        const movieIds = movies.map((m) => m.id);
+        const [genreRows] = await database.query(
+            `SELECT mg.movie_id, g.id, g.name
+             FROM movie_genres mg
+             INNER JOIN genres g ON mg.genre_id = g.id
+             WHERE mg.movie_id IN (?)`,
+            [movieIds],
+        );
+
+        const genresByMovie = {};
+        for (const row of genreRows) {
+            if (!genresByMovie[row.movie_id]) genresByMovie[row.movie_id] = [];
+            genresByMovie[row.movie_id].push({ id: row.id, name: row.name });
+        }
+
+        const result = movies.map((m) => ({
+            ...m,
+            genres: genresByMovie[m.id] ?? [],
+        }));
+
+        return res.status(200).json(result);
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "An error has occurred" });
+    }
+}
+
+export async function searchLocalMovies(query) {
+    try {
+        const [movies] = await database.query(
+            "SELECT * FROM movies WHERE is_custom = 1 AND title LIKE ?",
+            [`%${query}%`]
+        );
+        return movies;
+    } catch (err) {
+        console.error(err);
+        throw new Error("An error has occurred");
     }
 }

@@ -9,7 +9,7 @@ import App from './App';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5,
+      staleTime: 1000 * 60 * 60 * 24, // 24h default stale time for all queries (less for /me)
       retry: 1,
     },
   },

@@ -32,6 +32,7 @@ export const validateLocalMovieCreation = [
             if (!value.every(Number.isInteger)) {
                 throw new Error("Each genre ID must be an integer");
             }
+            return true;
         }),
     handleValidationErrors,
 ];
