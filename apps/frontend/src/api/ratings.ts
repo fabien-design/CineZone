@@ -21,7 +21,7 @@ export const ratingsApi = {
     api.get<Rating[]>(ratingPath(ref)).then(r => r.data),
 
   getMyRating: (ref: MovieRef): Promise<Rating | null> =>
-    api.get<Rating>(`${ratingPath(ref)}/me`).then(r => r.data).catch(err => {
+    api.get<Rating>(`${ratingPath(ref)}/me`, { suppressErrorToast: true }).then(r => r.data).catch(err => {
       if (err.response?.status === 404) return null;
       throw err;
     }),

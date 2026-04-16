@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { loginSchema, type LoginValues } from '@/lib/schemas/auth';
 import { authApi } from '@/api/auth';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ export function LoginForm({ onSuccess }: Props) {
     setServerError('');
     try {
       await authApi.login(values);
+      toast.success('Welcome back!');
       onSuccess();
     } catch {
       setServerError('Email or password is incorrect.');

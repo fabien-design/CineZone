@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { ratingSchema, type RatingValues } from "@/lib/schemas/rating";
 import { StarRating } from "../ui/StarRating";
 import { Textarea } from "../ui/textarea";
@@ -61,8 +61,6 @@ export function RatingForm({
     onDeleteReview,
     onSuccess,
 }: RatingFormProps) {
-    const [serverError, setServerError] = useState("");
-
     const {
         register,
         control,
@@ -77,14 +75,12 @@ export function RatingForm({
     const currentRating = watch("rating");
 
     const onSubmit = async (values: RatingValues) => {
-        setServerError("");
         try {
             await onSubmitForm(values);
+            toast.success(initialRating > 0 ? "Rating updated!" : "Rating submitted!");
             onSuccess();
         } catch {
-            setServerError(
-                "An error occurred while submitting your rating. Please try again.",
-            );
+            // axios interceptor already shows the error toast
         }
     };
 
@@ -134,12 +130,6 @@ export function RatingForm({
                     </p>
                 )}
             </div>
-
-            {serverError && (
-                <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                    {serverError}
-                </p>
-            )}
 
             <div className="flex gap-3 items-center">
                 <Button

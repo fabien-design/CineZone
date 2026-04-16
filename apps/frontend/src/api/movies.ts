@@ -40,4 +40,7 @@ export const moviesApi = {
 
   deleteLocalMovie: (id: number) =>
     api.delete(`/movies/local/${id}`).then(r => r.data),
+
+  getRandom: () =>
+    api.get<{ id: number; title: string }>('/movies/random', { suppressErrorToast: true }).then(r => r.data),
 };

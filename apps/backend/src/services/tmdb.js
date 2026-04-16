@@ -58,3 +58,6 @@ export const getGenres = () =>
 
 export const discoverMovies = (options = {}) =>
   tmdbClient.get('/discover/movie', { params: options }).then(r => r.data);
+
+export const getPopularMovies = (page = 1) =>
+  tmdbClient.get('/movie/popular', { params: { page } }).then(r => r.data);

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { Search, X } from "lucide-react";
 import { Navbar } from "../components/layout/Navbar";
 import { DiscoverFilters } from "../components/discover/DiscoverFilters";
@@ -16,6 +17,7 @@ import { useSearchParams } from "react-router";
 import BottomBar from "@/components/layout/BottomBar";
 
 export function DiscoverPage() {
+    useDocumentTitle('Discover');
     const [searchParams, setSearchParams] = useSearchParams();
     const [query, setQuery] = useState(searchParams.get("q") ?? "");
     const [debouncedQuery, setDebounced] = useState("");
@@ -194,7 +196,7 @@ export function DiscoverPage() {
         <div className="min-h-screen bg-cinema-950">
             <Navbar />
 
-            <main className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-16 flex flex-col gap-5">
+            <main id="main-content" className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-16 flex flex-col gap-5">
                 {/* Search bar */}
                 <div className="relative">
                     <Search
@@ -206,11 +208,13 @@ export function DiscoverPage() {
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Rechercher un film..."
+                        aria-label="Search movies"
                         className="w-full bg-cinema-900 border border-border/40 rounded-xl pl-11 pr-10 py-3 text-screen-100 placeholder:text-cinema-500 focus:outline-none focus:border-reel-400/50 focus:ring-1 focus:ring-reel-400/20 transition-colors text-sm"
                     />
                     {query && (
                         <button
                             onClick={() => setQuery("")}
+                            aria-label="Clear search"
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-cinema-400 hover:text-screen-100 transition-colors p-1"
                         >
                             <X size={15} />

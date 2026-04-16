@@ -9,7 +9,7 @@ export const authApi = {
     api.post('/users/login', payload).then(r => r.data),
 
   register: (payload: RegisterPayload) =>
-    api.post('/users/register', payload).then(r => r.data),
+    api.post('/users/register', payload, { suppressSuccessToast: true, suppressErrorToast: true }).then(r => r.data),
 
   me: () =>
     api.get<User>('/users/me').then(r => r.data),
