@@ -7,6 +7,7 @@ import path from 'path';
 
 import movieRoutes from './routes/movies.js';
 import userRoutes from './routes/users.js';
+import ratingRoutes from './routes/ratings.js';
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -29,6 +30,7 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/movies', movieRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err.stack);

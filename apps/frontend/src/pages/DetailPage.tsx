@@ -12,13 +12,21 @@ import { UserActions } from '../components/movie/UserActions';
 import { MovieRow } from '../components/movie/MovieRow';
 import { SectionHeader } from '../components/ui/SectionHeader';
 import { useAuth } from '@/hooks/useAuth';
+import { useRating } from '@/hooks/useRating';
+import { ReviewList } from '@/components/movie/ReviewList';
+import type { MovieRef } from '@/types/movie';
 
 export function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const movieId = Number(id);
 
-  const { isAuthenticated } = useAuth(); 
+  const { isAuthenticated } = useAuth();
   const { data: movie, isLoading: isLoadingMovie, isError } = useMovieById(movieId);
+
+  // DetailPage always shows TMDB movies. If the movie is ever saved to the local DB,
+  // pass { source: 'local', id: movie.localId } instead so ratings share the same row.
+  const movieRef: MovieRef = { source: 'tmdb', id: movieId };
+  const { movieRatings, isLoadingRatings, myRating, upsert: upsertRating, remove: removeRating } = useRating(movieRef, isAuthenticated);
 
   const trailerRef = useRef<HTMLDivElement>(null);
   const scrollToTrailer = () =>
@@ -101,16 +109,26 @@ export function DetailPage() {
           </div>
         </section>
 
-        {/* User activity: favorites, watchlist, rating, review */}
+        {/* User activity: rating, review */}
         <UserActions
           isAuthenticated={isAuthenticated}
           isFavorite={false}
           isInWatchlist={false}
-          userRating={0}
+          initialRating={myRating?.score ?? 0}
+          initialComment={myRating?.comment ?? ''}
           onToggleFavorite={() => {}}
           onToggleWatchlist={() => {}}
-          onSubmitRating={(_rating, _comment) => {}}
+          onSubmitRating={async (values) => { await upsertRating(values); }}
+          onDeleteReview={async () => { await removeRating(); }}
         />
+
+        {/* Community reviews */}
+        <section aria-labelledby="reviews-heading">
+          <SectionHeader title="Community Reviews" id="reviews-heading" />
+          <ReviewList ratings={movieRatings} isLoading={isLoadingRatings} />
+        </section>
+        
+
 
         {/* Cast */}
         {cast.length > 0 && <CastSection cast={cast} />}

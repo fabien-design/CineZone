@@ -49,11 +49,18 @@ api.interceptors.response.use(
             return api.request(originalRequest);
         } catch {
             pendingQueue = [];
-            toast.error(
-                err.response?.data?.message ||
-                    "Session expired. Please log in again.",
+            const protectedRoutes = ["/profile", "/watchlist", "/favorites", "/admin"];
+            const isProtected = protectedRoutes.some((r) =>
+                window.location.pathname.startsWith(r),
             );
-            navigate("/login");
+            if (isProtected) {
+                toast.error(
+                    err.response?.data?.message ||
+                        "Session expired. Please log in again.",
+                );
+                const redirectTo = window.location.pathname + window.location.search;
+                navigate(`/login?redirectTo=${encodeURIComponent(redirectTo)}`);
+            }
             return Promise.reject(err);
         } finally {
             isRefreshing = false;
