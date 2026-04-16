@@ -73,10 +73,23 @@ router.get("/search", async (req, res, next) => {
 
 router.get("/random", async (_req, res, next) => {
     try {
-        const page = Math.floor(Math.random() * 10) + 1;
+        // Use pages 1-5 instead of 1-10 for more reliable data
+        const page = Math.floor(Math.random() * 5) + 1;
         const data = await getPopularMovies(page);
-        const movies = data.results.filter(m => m.poster_path);
-        if (!movies.length) return res.status(404).json({ message: "No movie found" });
+
+        if (!data.results || !data.results.length) {
+            return res.status(404).json({ message: "No movie found" });
+        }
+
+        const movies = data.results.filter(
+            (m) => m.poster_path && m.id && m.title,
+        );
+        if (!movies.length) {
+            return res
+                .status(404)
+                .json({ message: "No movie with poster found" });
+        }
+
         const movie = movies[Math.floor(Math.random() * movies.length)];
         res.json({ id: movie.id, title: movie.title });
     } catch (err) {
