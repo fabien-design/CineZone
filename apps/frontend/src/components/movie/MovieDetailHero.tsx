@@ -1,4 +1,4 @@
-import { Bookmark, Play, ClockPlus, Eye } from "lucide-react";
+import { Bookmark, Play, ClockPlus, Eye, View } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import {
@@ -9,8 +9,9 @@ import {
     getPosterUrl,
 } from "../../lib/tmdb";
 import { GenreBadge } from "../ui/GenreBadge";
-import type { HeroMovieData } from "../../types/movie";
+import type { HeroMovieData, MovieRef } from "../../types/movie";
 import { useState } from "react";
+import { ViewerCount } from "./ViewerCount";
 
 interface MovieDetailHeroProps {
     movie: HeroMovieData;
@@ -41,8 +42,10 @@ export function MovieDetailHero({
         (v) => v.type === "Trailer" && v.site === "YouTube",
     );
 
-    
-    console.log(backdropUrl, posterUrl);
+    const movieRef: MovieRef = {
+        source: movie.source ?? "tmdb",
+        id: movie.id ?? 0,
+    }
 
     const [optimisticFav, setOptimisticFav] = useState<boolean>(isFavorite);
     const [optimisticWatchlist, setOptimisticWatchlist] =
@@ -74,6 +77,8 @@ export function MovieDetailHero({
 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col gap-3">
+                    <ViewerCount movieRef={movieRef} />
+                    
                     {movie.genres?.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                             {movie.genres.map((g) => (

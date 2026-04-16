@@ -77,6 +77,7 @@ export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
 
   const heroData = source === 'local' && localQuery.data
     ? {
+        id: movieId,
         source: 'local' as const,
         title:         localQuery.data.title,
         poster_path:   localQuery.data.poster_url,
