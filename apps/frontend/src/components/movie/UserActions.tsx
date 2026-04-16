@@ -7,12 +7,8 @@ import type { RatingValues } from '@/lib/schemas/rating';
 
 interface UserActionsProps {
   isAuthenticated: boolean;
-  isFavorite: boolean;
-  isInWatchlist: boolean;
   initialRating?: number;
   initialComment?: string;
-  onToggleFavorite: () => void;
-  onToggleWatchlist: () => void;
   onSubmitRating: (values: RatingValues) => Promise<void>;
   onDeleteReview: () => Promise<void>;
 }
@@ -43,12 +39,8 @@ function UnauthenticatedPrompt() {
 
 export function UserActions({
   isAuthenticated,
-  isFavorite,
-  isInWatchlist,
   initialRating = 0,
   initialComment = '',
-  onToggleFavorite,
-  onToggleWatchlist,
   onSubmitRating,
   onDeleteReview,
 }: UserActionsProps) {
