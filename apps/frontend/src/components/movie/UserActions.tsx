@@ -3,16 +3,8 @@ import { LogIn } from 'lucide-react';
 import { buttonVariants } from '../ui/button';
 import { SectionHeader } from '../ui/SectionHeader';
 import { RatingForm } from './RatingForm';
-import { cn } from '@/lib/utils';
 import type { RatingValues } from '@/lib/schemas/rating';
 
-interface ListButtonProps {
-    active: boolean;
-    onClick: () => void;
-    icon: React.ReactNode;
-    label: string;
-    activeClass: string;
-}
 
 function UnauthenticatedPrompt() {
     const location = useLocation();

@@ -1,4 +1,4 @@
-import { Bookmark, Play, ClockPlus, Eye, View } from "lucide-react";
+import { Bookmark, Play, ClockPlus, Eye } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import {
