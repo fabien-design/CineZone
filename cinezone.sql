@@ -19,7 +19,7 @@ CREATE TABLE users (
   created_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
-);
+) ENGINE=InnoDB;
 
 -- ------------------------------------------------------------
 -- GENRES  (synchronisés depuis TMDB ou gérés en admin)
@@ -28,7 +28,7 @@ CREATE TABLE genres (
   id           INT UNSIGNED    NOT NULL,               -- id TMDB (ex: 28 = Action)
   name         VARCHAR(100)    NOT NULL,
   PRIMARY KEY (id)
-);
+) ENGINE=InnoDB;
 
 -- ------------------------------------------------------------
 -- MOVIES  (cache local + films ajoutés par l'admin)
@@ -47,7 +47,7 @@ CREATE TABLE movies (
   created_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
-);
+) ENGINE=InnoDB;
 
 -- ------------------------------------------------------------
 -- MOVIE_GENRES  (liaison N:N)
@@ -58,7 +58,7 @@ CREATE TABLE movie_genres (
   PRIMARY KEY (movie_id, genre_id),
   CONSTRAINT fk_mg_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
   CONSTRAINT fk_mg_genre FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE CASCADE
-);
+) ENGINE=InnoDB;
 
 -- ------------------------------------------------------------
 -- GENRES (seed TMDB)
@@ -96,7 +96,7 @@ CREATE TABLE favorites (
   UNIQUE KEY uq_fav (user_id, movie_id),
   CONSTRAINT fk_fav_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
   CONSTRAINT fk_fav_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE
-);
+) ENGINE=InnoDB;
 
 -- ------------------------------------------------------------
 -- WATCHLIST
@@ -110,7 +110,7 @@ CREATE TABLE watchlist (
   UNIQUE KEY uq_wl (user_id, movie_id),
   CONSTRAINT fk_wl_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
   CONSTRAINT fk_wl_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE
-);
+) ENGINE=InnoDB;
 
 -- ------------------------------------------------------------
 -- RATINGS  (notes utilisateur sur un film)
@@ -126,9 +126,8 @@ CREATE TABLE ratings (
   PRIMARY KEY (id),
   UNIQUE KEY uq_rating (user_id, movie_id),
   CONSTRAINT fk_rat_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
-  CONSTRAINT fk_rat_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
-  CONSTRAINT chk_score CHECK (score BETWEEN 1 AND 10)
-);
+  CONSTRAINT fk_rat_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- ------------------------------------------------------------
 -- WATCH_HISTORY  (historique de visionnage)
@@ -142,6 +141,34 @@ CREATE TABLE watch_history (
   UNIQUE KEY uq_watched (user_id, movie_id),
   CONSTRAINT fk_wh_user  FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
   CONSTRAINT fk_wh_movie FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE
-);
+) ENGINE=InnoDB;
 
 CREATE INDEX idx_wh_user ON watch_history(user_id);
+
+DELIMITER $$
+
+CREATE TRIGGER check_score_before_insert
+BEFORE INSERT ON ratings
+FOR EACH ROW
+BEGIN
+  IF NEW.score < 1 OR NEW.score > 10 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Score must be between 1 and 10';
+  END IF;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER check_score_before_update
+BEFORE UPDATE ON ratings
+FOR EACH ROW
+BEGIN
+  IF NEW.score < 1 OR NEW.score > 10 THEN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Score must be between 1 and 10';
+  END IF;
+END$$
+
+DELIMITER ;

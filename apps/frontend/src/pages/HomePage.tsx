@@ -1,4 +1,5 @@
 import { useAtom } from "jotai";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { trendingWindowAtom } from "../store/uiAtoms";
 import { useTrending, useLatestMovies } from "../hooks/useMovies";
 import { Navbar } from "../components/layout/Navbar";
@@ -10,6 +11,7 @@ import { SectionHeader } from "../components/ui/SectionHeader";
 import BottomBar from "@/components/layout/BottomBar";
 
 export function HomePage() {
+    useDocumentTitle('Home');
     const [trendingWindow, setTrendingWindow] = useAtom(trendingWindowAtom);
 
     const { data: trending, isLoading: trendingLoading } =
@@ -30,7 +32,7 @@ export function HomePage() {
                 <HeroBanner movie={heroMovie} />
             )}
 
-            <main className="max-w-7xl mx-auto px-4 md:px-8 py-12 flex flex-col gap-14">
+            <main id="main-content" className="max-w-7xl mx-auto px-4 md:px-8 py-12 flex flex-col gap-14">
                 <section aria-labelledby="trending-heading">
                     <SectionHeader title="Trending" id="trending-heading">
                         <TrendingToggle

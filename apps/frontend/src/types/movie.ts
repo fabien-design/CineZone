@@ -11,6 +11,7 @@ export type MovieRef =
 /** Movie stored in the local DB (is_custom = 1). */
 export interface LocalMovie {
     id: number;
+    source: "local";
     title: string;
     overview: string | null;
     poster_url: string | null;
@@ -93,6 +94,7 @@ export interface Video {
  * Both MovieDetail and LocalMovie can be adapted to this type.
  */
 export interface HeroMovieData {
+    source?: "tmdb" | "local";
     title: string;
     poster_path: string | null;
     backdrop_path: string | null;
@@ -106,6 +108,7 @@ export interface HeroMovieData {
 }
 
 export interface MovieDetail extends Movie {
+    source: "tmdb";
     genres: Genre[];
     runtime: number | null;
     tagline: string | null;
