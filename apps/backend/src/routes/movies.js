@@ -19,6 +19,7 @@ import {
 import { authenticateUser } from "../middlewares/authMiddleware.js";
 import { isAdmin } from "../middlewares/isAdmin.js";
 import { validateLocalMovieCreation } from "../middlewares/validateLocalMovie.js";
+import { uploadMovieImages } from "../middlewares/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -97,18 +98,40 @@ router.get("/random", async (_req, res, next) => {
     }
 });
 
+// Parse genre_ids JSON string sent via multipart/form-data
+const parseGenreIds = (req, _res, next) => {
+    if (typeof req.body.genre_ids === "string") {
+        try {
+            req.body.genre_ids = JSON.parse(req.body.genre_ids);
+        } catch {
+            req.body.genre_ids = [];
+        }
+    }
+    next();
+};
+
 // Local movies CRUD — MUST be before /:id to avoid route conflict
 router.get("/local/public", getLocalMovies); // Public: visible in discover for all users
 router.get("/local", authenticateUser, isAdmin, getLocalMovies);
-router.get("/local/:id", authenticateUser, isAdmin, getLocalMovie);
+router.get("/local/:id", getLocalMovie);
 router.post(
     "/local",
     authenticateUser,
     isAdmin,
+    uploadMovieImages,
+    parseGenreIds,
     validateLocalMovieCreation,
     createMovie,
 );
-router.put("/local/:id", authenticateUser, isAdmin, updateMovie);
+router.put(
+    "/local/:id",
+    authenticateUser,
+    isAdmin,
+    uploadMovieImages,
+    parseGenreIds,
+    validateLocalMovieCreation,
+    updateMovie,
+);
 router.delete("/local/:id", authenticateUser, isAdmin, deleteMovie);
 
 router.get("/:id", async (req, res, next) => {

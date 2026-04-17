@@ -19,7 +19,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:5173",
+        origin: true,
         credentials: true,
     },
 });
@@ -63,6 +63,7 @@ app.use(
 
 app.use(cookieParser());
 app.use(express.json());
+app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));
 
 app.get("/api/health", (_req, res) => {
     res.json({ status: "OK" });

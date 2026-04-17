@@ -1,5 +1,5 @@
 import api from './axiosInstance';
-import type { Genre, LocalMovie, LocalMoviePayload, Movie, MovieDetail, PagedResponse } from '../types/movie';
+import type { Genre, LocalMovie, Movie, MovieDetail, PagedResponse } from '../types/movie';
 
 export type TrendingWindow = 'day' | 'week';
 
@@ -32,11 +32,11 @@ export const moviesApi = {
   getLocalMovieById: (id: number) =>
     api.get<LocalMovie>(`/movies/local/${id}`).then(r => r.data),
 
-  createLocalMovie: (data: LocalMoviePayload) =>
-    api.post<LocalMovie>('/movies/local', data).then(r => r.data),
+  createLocalMovie: (data: FormData) =>
+    api.post<LocalMovie>('/movies/local', data, { headers: { 'Content-Type': undefined }, suppressErrorToast: true }).then(r => r.data),
 
-  updateLocalMovie: (id: number, data: LocalMoviePayload) =>
-    api.put<LocalMovie>(`/movies/local/${id}`, data).then(r => r.data),
+  updateLocalMovie: (id: number, data: FormData) =>
+    api.put<LocalMovie>(`/movies/local/${id}`, data, { headers: { 'Content-Type': undefined }, suppressErrorToast: true }).then(r => r.data),
 
   deleteLocalMovie: (id: number) =>
     api.delete(`/movies/local/${id}`).then(r => r.data),

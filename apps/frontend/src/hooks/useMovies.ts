@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { moviesApi, type TrendingWindow } from "../api/movies";
-import type { LocalMovie, LocalMoviePayload, MovieDetail } from "../types/movie";
+import type { LocalMovie, MovieDetail } from "../types/movie";
 
 export const useTrending = (window: TrendingWindow) =>
     useQuery({
@@ -77,7 +77,7 @@ export const useDiscover = (params: Record<string, unknown>, enabled = true) =>
 export const useCreateLocalMovie = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (data: LocalMoviePayload) => moviesApi.createLocalMovie(data),
+        mutationFn: (data: FormData) => moviesApi.createLocalMovie(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["movies", "local"] });
         },
@@ -87,7 +87,7 @@ export const useCreateLocalMovie = () => {
 export const useUpdateLocalMovie = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, data }: { id: number; data: LocalMoviePayload }) =>
+        mutationFn: ({ id, data }: { id: number; data: FormData }) =>
             moviesApi.updateLocalMovie(id, data),
         onSuccess: (_result, { id }) => {
             queryClient.invalidateQueries({ queryKey: ["movies", "local"] });

@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { isAxiosError } from 'axios';
+import { toast } from 'sonner';
+import type { UseFormSetError } from 'react-hook-form';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Navigate } from 'react-router';
 import { Plus, Pencil, Trash2, Loader2, Film } from 'lucide-react';
@@ -61,24 +64,49 @@ export function AdminPage() {
         setFormOpen(true);
     };
 
-    const handleFormSubmit = async (values: LocalMovieValues) => {
-        const payload = {
-            title: values.title,
-            overview: values.overview || null,
-            poster_url: values.poster_url ?? null,
-            backdrop_url: values.backdrop_url ?? null,
-            release_date: values.release_date || null,
-            vote_average:
-                values.vote_average === '' || values.vote_average === undefined
-                    ? null
-                    : Number(values.vote_average),
-            genre_ids: values.genre_ids ?? [],
-        };
+    const handleFormSubmit = async (values: LocalMovieValues, setError: UseFormSetError<LocalMovieValues>) => {
+        const formData = new FormData();
+        formData.append('title', values.title);
+        if (values.overview) formData.append('overview', values.overview);
 
-        if (editingMovie) {
-            await updateMovie.mutateAsync({ id: editingMovie.id, data: payload });
-        } else {
-            await createMovie.mutateAsync(payload);
+        if (values.poster_file instanceof File) {
+            formData.append('poster', values.poster_file);
+        } else if (values.poster_url) {
+            formData.append('poster_url', values.poster_url as string);
+        }
+
+        if (values.backdrop_file instanceof File) {
+            formData.append('backdrop', values.backdrop_file);
+        } else if (values.backdrop_url) {
+            formData.append('backdrop_url', values.backdrop_url as string);
+        }
+
+        if (values.release_date) formData.append('release_date', values.release_date);
+        if (values.vote_average !== undefined) {
+            formData.append('vote_average', String(values.vote_average));
+        }
+        formData.append('genre_ids', JSON.stringify(values.genre_ids ?? []));
+
+        try {
+            if (editingMovie) {
+                await updateMovie.mutateAsync({ id: editingMovie.id, data: formData });
+            } else {
+                await createMovie.mutateAsync(formData);
+            }
+        } catch (err) {
+            if (isAxiosError(err) && Array.isArray(err.response?.data)) {
+                // Erreurs express-validator : affichage par champ dans le formulaire
+                (err.response.data as { path: string; msg: string }[]).forEach(({ path, msg }) => {
+                    setError(path as keyof LocalMovieValues, { message: msg });
+                });
+            } else {
+                toast.error(
+                    isAxiosError(err)
+                        ? (err.response?.data?.message ?? 'Une erreur est survenue')
+                        : 'Une erreur est survenue',
+                );
+            }
+            throw err; // empêche le dialog de se fermer
         }
     };
 
