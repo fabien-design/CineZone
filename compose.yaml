@@ -28,6 +28,8 @@ services:
       - "8080:80"
     depends_on:
       - db
+    networks:
+      - cinezone
 
   backend:
     build:
@@ -40,6 +42,8 @@ services:
       DB_PORT: 3306
       DB_PASSWORD: ${DB_PASSWORD:-cinezone}
       FRONTEND_URL: http://localhost
+    volumes:
+      - ./apps/backend/uploads:/app/uploads
     ports:
       - "5000:5000"
     depends_on:
