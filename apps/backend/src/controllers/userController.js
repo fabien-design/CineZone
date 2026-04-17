@@ -29,7 +29,7 @@ export async function login(req, res) {
 
     try {
         const [users] = await database.query(
-            "SELECT id, role, password FROM users WHERE email =? LIMIT 1",
+            "SELECT id, username, email, role, password FROM users WHERE email =? LIMIT 1",
             [email],
         );
 
@@ -76,17 +76,20 @@ export async function login(req, res) {
             [refreshToken, user.id],
         );
 
-        res.cookie("accessToken", token, {
-            httpOnly: true, // Ensure the cookie cannot be accessed via JavaScript (security against XSS attacks)
-            secure: process.env.NODE_ENV === "production", // Set to true in production for HTTPS-only cookies
-            maxAge: 60 * 60 * 1000, // 60 minutes in mileseconds
-            sameSite: "strict", // Ensures the cookie is sent only with requests from the same site
-        });
-        res.cookie("refreshToken", refreshToken, {
+        const cookieOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours is mileseconds
-            sameSite: "strict",
+            sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+            path: "/",
+        };
+
+        res.cookie("accessToken", token, {
+            ...cookieOptions,
+            maxAge: 60 * 60 * 1000, // 60 minutes
+        });
+        res.cookie("refreshToken", refreshToken, {
+            ...cookieOptions,
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
         return res.status(200).json({
@@ -131,9 +134,14 @@ export async function logout(req, res) {
             [userId],
         );
 
-        // Clear the cookies
-        res.clearCookie("accessToken");
-        res.clearCookie("refreshToken");
+        const clearOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+            path: "/",
+        };
+        res.clearCookie("accessToken", clearOptions);
+        res.clearCookie("refreshToken", clearOptions);
 
         res.status(200).send({
             message: "Logged out successfully",
@@ -178,8 +186,9 @@ export async function refreshToken(req, res) {
         res.cookie("accessToken", newAccessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+            path: "/",
             maxAge: 60 * 60 * 1000, // 60 minutes
-            sameSite: "strict",
         });
 
         return res

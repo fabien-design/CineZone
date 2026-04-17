@@ -1,15 +1,25 @@
 import database from "../services/database.js";
 
+/** Build the full URL for an uploaded file, or fall back to a URL from the body. */
+function resolveImageUrl(req, fileField, bodyField) {
+    const file = req.files?.[fileField]?.[0];
+    if (file) {
+        return `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
+    }
+    return req.body[bodyField] ?? null;
+}
+
 export async function createMovie(req, res) {
     const {
         title,
         overview,
-        poster_url,
-        backdrop_url,
         release_date,
         vote_average,
         genre_ids,
     } = req.body;
+
+    const poster_url = resolveImageUrl(req, "poster", "poster_url");
+    const backdrop_url = resolveImageUrl(req, "backdrop", "backdrop_url");
 
     if (!title) return res.status(400).json({ message: "title is required" });
 
@@ -50,15 +60,10 @@ export async function createMovie(req, res) {
 
 export async function updateMovie(req, res) {
     const id = parseInt(req.params.id);
-    const {
-        title,
-        overview,
-        poster_url,
-        backdrop_url,
-        release_date,
-        vote_average,
-        genre_ids,
-    } = req.body;
+    const { title, overview, release_date, vote_average, genre_ids } = req.body;
+
+    const poster_url = resolveImageUrl(req, "poster", "poster_url");
+    const backdrop_url = resolveImageUrl(req, "backdrop", "backdrop_url");
 
     try {
         const [[existing]] = await database.query(
@@ -74,8 +79,8 @@ export async function updateMovie(req, res) {
             [
                 title,
                 overview ?? null,
-                poster_url ?? null,
-                backdrop_url ?? null,
+                poster_url,
+                backdrop_url,
                 release_date ?? null,
                 vote_average ?? null,
                 id,
