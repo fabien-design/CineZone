@@ -1,5 +1,6 @@
 import { cn } from '../../lib/utils';
 import type { TrendingWindow } from '../../api/movies';
+import { useTranslation } from 'react-i18next';
 
 interface TrendingToggleProps {
   value: TrendingWindow;
@@ -7,11 +8,13 @@ interface TrendingToggleProps {
 }
 
 const OPTIONS: { value: TrendingWindow; label: string }[] = [
-  { value: 'day', label: 'Today' },
-  { value: 'week', label: 'This Week' },
+  { value: 'day', label: 'trendingToday' },
+  { value: 'week', label: 'trendingThisWeek' },
 ];
 
 export function TrendingToggle({ value, onChange }: TrendingToggleProps) {
+  const { t } = useTranslation();
+
   return (
     <div
       className="flex gap-1 bg-cinema-800 rounded-lg p-1"
@@ -30,7 +33,7 @@ export function TrendingToggle({ value, onChange }: TrendingToggleProps) {
               : 'text-cinema-300 hover:text-screen-100',
           )}
         >
-          {option.label}
+          {t(`home.${option.label}`)}
         </button>
       ))}
     </div>

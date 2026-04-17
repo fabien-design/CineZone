@@ -1,9 +1,9 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useParams, Link } from 'react-router';
-import { useAtomValue } from 'jotai';
 import { ChevronLeft } from 'lucide-react';
-import { isAuthenticatedAtom } from '../store/uiAtoms';
-import { useMovieById } from '../hooks/useMovies';
+import { useMovieById, useLocalMovieById } from '../hooks/useMovies';
 import { formatMoney } from '../lib/tmdb';
 import { Navbar } from '../components/layout/Navbar';
 import { HeroBannerSkeleton } from '../components/movie/HeroBannerSkeleton';
@@ -13,23 +13,50 @@ import { TrailerSection } from '../components/movie/TrailerSection';
 import { UserActions } from '../components/movie/UserActions';
 import { MovieRow } from '../components/movie/MovieRow';
 import { SectionHeader } from '../components/ui/SectionHeader';
+import { useAuth } from '@/hooks/useAuth';
+import { useRating } from '@/hooks/useRating';
+import { useListStatus, useToggleList } from '@/hooks/useUserLists';
+import { ReviewList } from '@/components/movie/ReviewList';
+import type { MovieRef } from '@/types/movie';
+import BottomBar from '@/components/layout/BottomBar';
 
-export function DetailPage() {
+interface DetailPageProps {
+  source?: 'tmdb' | 'local';
+}
+
+export function DetailPage({ source = 'tmdb' }: DetailPageProps) {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const movieId = Number(id);
 
-  const isAuthenticated = useAtomValue(isAuthenticatedAtom);
-  const { data: movie, isLoading, isError } = useMovieById(movieId);
+  const { isAuthenticated } = useAuth();
+  const tmdbQuery = useMovieById(movieId, source === 'tmdb');
+  const localQuery = useLocalMovieById(movieId, source === 'local');
+  const { data: movie, isLoading: isLoadingMovie, isError } =
+    source === 'local' ? localQuery : tmdbQuery;
+
+  const movieRef: MovieRef = { source, id: movieId };
+  useDocumentTitle(movie?.title ?? '');
+  const { movieRatings, isLoadingRatings, myRating, upsert: upsertRating, remove: removeRating } = useRating(movieRef, isAuthenticated);
+
+  const { data: favStatus }       = useListStatus('favorites', movieRef, isAuthenticated);
+  const { data: watchlistStatus } = useListStatus('watchlist',  movieRef, isAuthenticated);
+  const { data: watchedStatus }   = useListStatus('watched',    movieRef, isAuthenticated);
+
+  const toggleFavorite  = useToggleList('favorites', movieRef);
+  const toggleWatchlist = useToggleList('watchlist',  movieRef);
+  const toggleWatched   = useToggleList('watched',    movieRef);
 
   const trailerRef = useRef<HTMLDivElement>(null);
   const scrollToTrailer = () =>
     trailerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  if (isLoading) {
+  if (isLoadingMovie) {
     return (
       <div className="min-h-screen bg-cinema-950">
         <Navbar />
         <HeroBannerSkeleton />
+        <BottomBar />
       </div>
     );
   }
@@ -38,57 +65,77 @@ export function DetailPage() {
     return (
       <div className="min-h-screen bg-cinema-950 flex flex-col items-center justify-center gap-4">
         <Navbar />
-        <p className="text-screen-300 text-lg">Movie not found.</p>
+        <p className="text-screen-300 text-lg">{t('detail.notFound')}</p>
         <Link to="/" className="text-reel-400 hover:text-reel-300 text-sm underline">
-          Back to Home
+          {t('detail.backToHome')}
         </Link>
+        <BottomBar />
       </div>
     );
   }
 
-  const cast = movie.credits?.cast?.slice(0, 15) ?? [];
-  const recommendations = movie.recommendations?.results?.slice(0, 12) ?? [];
-  const hasTrailerSection = movie.videos?.results?.some(v => v.site === 'YouTube');
+  // Narrow to MovieDetail for TMDB-only fields
+  const tmdbMovie = source === 'tmdb' ? tmdbQuery.data : undefined;
+
+  const heroData = source === 'local' && localQuery.data
+    ? {
+        id: movieId,
+        source: 'local' as const,
+        title:         localQuery.data.title,
+        poster_path:   localQuery.data.poster_url,
+        backdrop_path: localQuery.data.backdrop_url,
+        vote_average:  localQuery.data.vote_average ?? 0,
+        release_date:  localQuery.data.release_date,
+        genres:        localQuery.data.genres,
+      }
+    : tmdbMovie;
+
+  const cast            = tmdbMovie?.credits?.cast?.slice(0, 15) ?? [];
+  const recommendations = tmdbMovie?.recommendations?.results?.slice(0, 12) ?? [];
+  const hasTrailerSection = tmdbMovie?.videos?.results?.some(v => v.site === 'YouTube') ?? false;
 
   const extraInfo: { label: string; value: string }[] = [
-    { label: 'Status', value: movie.status },
-    { label: 'Budget', value: formatMoney(movie.budget) },
-    { label: 'Revenue', value: formatMoney(movie.revenue) },
-    { label: 'Original Language', value: movie.original_language?.toUpperCase() ?? 'N/A' },
+    { label: t('detail.status'),           value: tmdbMovie?.status ?? '' },
+    { label: t('detail.budget'),           value: tmdbMovie ? formatMoney(tmdbMovie.budget) : '' },
+    { label: t('detail.revenue'),          value: tmdbMovie ? formatMoney(tmdbMovie.revenue) : '' },
+    { label: t('detail.originalLanguage'), value: tmdbMovie?.original_language?.toUpperCase() ?? '' },
   ].filter(item => item.value && item.value !== 'N/A');
+
+  if (!heroData) return null;
 
   return (
     <div className="min-h-screen bg-cinema-950">
       <Navbar />
 
       <MovieDetailHero
-        movie={movie}
+        movie={heroData}
         isAuthenticated={isAuthenticated}
-        isFavorite={false}       // TODO: wire up when auth is ready
-        isInWatchlist={false}    // TODO: wire up when auth is ready
-        onToggleFavorite={() => {}}
-        onToggleWatchlist={() => {}}
+        isFavorite={favStatus?.inList ?? false}
+        isInWatchlist={watchlistStatus?.inList ?? false}
+        isWatched={watchedStatus?.inList ?? false}
+        onToggleFavorite={() => toggleFavorite.mutate(favStatus?.inList ?? false)}
+        onToggleWatchlist={() => toggleWatchlist.mutate(watchlistStatus?.inList ?? false)}
+        onToggleWatched={() => toggleWatched.mutate(watchedStatus?.inList ?? false)}
         onWatchTrailer={scrollToTrailer}
       />
 
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-12 flex flex-col gap-14">
+      <main id="main-content" className="max-w-7xl mx-auto px-4 md:px-8 py-12 flex flex-col gap-14">
         {/* Back link */}
         <Link
           to="/"
           className="self-start flex items-center gap-1 text-sm text-cinema-400 hover:text-screen-100 transition-colors duration-200 -mt-6"
         >
           <ChevronLeft size={16} />
-          Back to Home
+          {t('detail.backToHome')}
         </Link>
 
         {/* Overview */}
         <section aria-labelledby="overview-heading">
-          <SectionHeader title="Overview" id="overview-heading" />
+          <SectionHeader title={t('detail.overview')} id="overview-heading" />
           <div className="flex flex-col md:flex-row gap-8">
             <p className="text-screen-300 text-base leading-relaxed flex-1">
-              {movie.overview || 'No overview available.'}
+              {movie.overview || t('detail.noOverview')}
             </p>
-            {/* Extra info sidebar */}
             {extraInfo.length > 0 && (
               <dl className="flex flex-col gap-3 md:w-56 shrink-0">
                 {extraInfo.map(({ label, value }) => (
@@ -102,35 +149,40 @@ export function DetailPage() {
           </div>
         </section>
 
-        {/* User activity: favorites, watchlist, rating, review */}
+        {/* User activity: rating, review */}
         <UserActions
           isAuthenticated={isAuthenticated}
-          isFavorite={false}
-          isInWatchlist={false}
-          userRating={0}
-          onToggleFavorite={() => {}}
-          onToggleWatchlist={() => {}}
-          onSubmitRating={(_rating, _comment) => {}}
+          initialRating={myRating?.score ?? 0}
+          initialComment={myRating?.comment ?? ''}
+          onSubmitRating={async (values) => { await upsertRating(values); }}
+          onDeleteReview={async () => { await removeRating(); }}
         />
+
+        {/* Community reviews */}
+        <section aria-labelledby="reviews-heading">
+          <SectionHeader title={t('detail.communityReviews')} id="reviews-heading" />
+          <ReviewList ratings={movieRatings} isLoading={isLoadingRatings} />
+        </section>
 
         {/* Cast */}
         {cast.length > 0 && <CastSection cast={cast} />}
 
         {/* Trailer */}
-        {hasTrailerSection && (
+        {hasTrailerSection && tmdbMovie && (
           <div ref={trailerRef}>
-            <TrailerSection videos={movie.videos.results} />
+            <TrailerSection videos={tmdbMovie.videos.results} />
           </div>
         )}
 
         {/* Recommendations */}
         {recommendations.length > 0 && (
           <section aria-labelledby="recommendations-heading">
-            <SectionHeader title="You Might Also Like" id="recommendations-heading" />
+            <SectionHeader title={t('detail.youMightAlsoLike')} id="recommendations-heading" />
             <MovieRow movies={recommendations} />
           </section>
         )}
       </main>
+      <BottomBar />
     </div>
   );
 }

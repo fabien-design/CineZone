@@ -11,7 +11,7 @@ interface MovieCardProps {
 export function MovieCard({ movie, className }: MovieCardProps) {
   return (
     <Link
-      to={`/movies/${movie.id}`}
+      to={movie.source === 'local' ? `/movies/local/${movie.id}` : `/movies/${movie.id}`}
       className={cn(
         'group relative flex flex-col rounded-lg overflow-hidden bg-cinema-800',
         'transition-transform duration-300 hover:-translate-y-1',
@@ -19,7 +19,7 @@ export function MovieCard({ movie, className }: MovieCardProps) {
         className,
       )}
     >
-      <div className="relative aspect-[2/3] overflow-hidden">
+      <div className="relative aspect-2/3 overflow-hidden">
         <img
           src={getPosterUrl(movie.poster_path)}
           alt={movie.title}
@@ -28,7 +28,7 @@ export function MovieCard({ movie, className }: MovieCardProps) {
         />
         <div className="absolute top-2 right-2 flex items-center gap-0.5 bg-cinema-950/80 backdrop-blur-sm rounded-full px-2 py-0.5 text-xs font-semibold text-reel-400">
           <span aria-hidden>★</span>
-          <span>{formatRating(movie.vote_average)}</span>
+          <span>{movie.vote_average ? formatRating(movie.vote_average) : 'N/A'}</span>
         </div>
       </div>
 
@@ -36,7 +36,7 @@ export function MovieCard({ movie, className }: MovieCardProps) {
         <h3 className="text-screen-100 text-sm font-medium line-clamp-2 leading-tight">
           {movie.title}
         </h3>
-        <span className="text-cinema-400 text-xs">{formatYear(movie.release_date)}</span>
+        <span className="text-cinema-400 text-xs">{movie.release_date ? formatYear(movie.release_date) : 'N/A'}</span>
       </div>
     </Link>
   );

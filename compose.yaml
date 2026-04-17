@@ -1,0 +1,74 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-cinezone}
+      MYSQL_DATABASE: ${DB_NAME:-cinezone}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./cinezone.sql:/docker-entrypoint-initdb.d/cinezone.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-cinezone}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cinezone
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-cinezone}
+      PMA_ABSOLUTE_URI: http://localhost:8080/
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - cinezone
+
+  backend:
+    build:
+      context: ./apps/backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_PASSWORD: ${DB_PASSWORD:-cinezone}
+      FRONTEND_URL: http://localhost
+    volumes:
+      - ./apps/backend/uploads:/app/uploads
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - cinezone
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      args:
+        VITE_API_URL: ""
+        VITE_TMDB_IMAGE_BASE: ${VITE_TMDB_IMAGE_BASE:-https://image.tmdb.org/t/p}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - cinezone
+
+volumes:
+  db_data:
+
+networks:
+  cinezone:
+    driver: bridge
